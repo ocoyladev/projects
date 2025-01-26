@@ -7,12 +7,16 @@ import Contact from './pages/contact';
 import Main from './pages/main';
 import PersonalInfo from './pages/personal-info';
 import Projects from './pages/projects';
+import Sidebar from './components/sidebar';
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (    
     <Router>
+      <div className="app">
+        <Sidebar />
+        <div className="content">
       <div>
         <a href="https://vitejs.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
@@ -35,6 +39,8 @@ function App() {
         <Route path="/projects" element={<Projects/>} />
         <Route path="/contact" element={<Contact/>} />
       </Routes>
+      </div>
+      </div>
     </Router>
 
 
