@@ -27,10 +27,10 @@ function App() {
       </div>
       <h1>Oscar Coyla</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>Let's make magic</p>
+        <h2>About me</h2>
+        <p>
+          I'm a software engineer, I like to learn new things and I'm always looking for new challenges.
+        </p>
       </div>
       <p>Here should be my projects, just wait</p>
       <Routes>
