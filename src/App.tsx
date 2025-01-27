@@ -10,7 +10,7 @@ import Projects from './pages/projects';
 import Sidebar from './components/sidebar';
 
 function App() {
-  const [count, setCount] = useState(0)
+  // const [count, setCount] = useState(0)
 
   return (    
     <Router>
