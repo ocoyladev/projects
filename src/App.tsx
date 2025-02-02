@@ -1,50 +1,71 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Contact from './pages/contact';
-import Main from './pages/main';
-import PersonalInfo from './pages/personal-info';
-import Projects from './pages/projects';
-import Sidebar from './components/sidebar';
+import React, { useState, useEffect, useRef } from 'react';
+import { useStore } from './store/useStore';
+import { Sidebar } from './components/Sidebar';
+import { Home } from './sections/Home';
+import { About } from './sections/About';
+import { Projects } from './sections/Projects';
+import { Contact } from './sections/Contact';
 
 function App() {
-  // const [count, setCount] = useState(0)
+  const [currentSection, setCurrentSection] = useState('home');
+  const { theme } = useStore();
+  const sectionsRef = useRef<HTMLDivElement>(null);
+  const lastScrollTime = useRef(Date.now());
+  const scrollTimeout = useRef<NodeJS.Timeout>();
 
-  return (    
-    <Router>
-      <div className="app">
-        <Sidebar />
-        <div className="content">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Oscar Coyla</h1>
-      <div className="card">
-        <h2>About me</h2>
-        <p>
-          I'm a software engineer, I like to learn new things and I'm always looking for new challenges.
-        </p>
-      </div>
-      <p>Here should be my projects, just wait</p>
-      <Routes>
-        <Route path="/" element={<Main/>} />
-        <Route path="/personal-info" element={<PersonalInfo/>} />
-        <Route path="/projects" element={<Projects/>} />
-        <Route path="/contact" element={<Contact/>} />
-      </Routes>
-      </div>
-      </div>
-    </Router>
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      
+      const now = Date.now();
+      if (now - lastScrollTime.current < 1000) return;
+      lastScrollTime.current = now;
 
-  )
+      const sections = ['home', 'about', 'projects', 'contact'];
+      const currentIndex = sections.indexOf(currentSection);
+      
+      if (e.deltaY > 0 && currentIndex < sections.length - 1) {
+        setCurrentSection(sections[currentIndex + 1]);
+      } else if (e.deltaY < 0 && currentIndex > 0) {
+        setCurrentSection(sections[currentIndex - 1]);
+      }
+    };
+
+    const sectionElement = sectionsRef.current;
+    if (sectionElement) {
+      sectionElement.addEventListener('wheel', handleWheel, { passive: false });
+    }
+
+    return () => {
+      if (sectionElement) {
+        sectionElement.removeEventListener('wheel', handleWheel);
+      }
+    };
+  }, [currentSection]);
+
+  const sections = {
+    home: <Home />,
+    about: <About />,
+    projects: <Projects />,
+    contact: <Contact />,
+  };
+
+  return (
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <Sidebar currentSection={currentSection} onSectionChange={setCurrentSection} />
+      <main className="md:pl-20 lg:pl-64" ref={sectionsRef}>
+        {sections[currentSection as keyof typeof sections]}
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;
