@@ -71,7 +71,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                     <img
                       src={project.images[currentImageIndex]}
                       alt={`${project.title} main view`}
-                      className="w-full h-full object-cover rounded-lg"
+                      // className="w-full h-full object-cover rounded-lg"
+                      className="w-full object-cover rounded-lg"
                     />
                     <button
                       onClick={(e) => { e.stopPropagation(); previousImage(); }}

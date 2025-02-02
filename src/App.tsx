@@ -11,7 +11,7 @@ function App() {
   const { theme } = useStore();
   const sectionsRef = useRef<HTMLDivElement>(null);
   const lastScrollTime = useRef(Date.now());
-  const scrollTimeout = useRef<NodeJS.Timeout>();
+  // const scrollTimeout = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -26,7 +26,7 @@ function App() {
       e.preventDefault();
       
       const now = Date.now();
-      if (now - lastScrollTime.current < 1000) return;
+      if (now - lastScrollTime.current < 1) return;
       lastScrollTime.current = now;
 
       const sections = ['home', 'about', 'projects', 'contact'];
@@ -42,6 +42,7 @@ function App() {
     const sectionElement = sectionsRef.current;
     if (sectionElement) {
       sectionElement.addEventListener('wheel', handleWheel, { passive: false });
+      sectionElement.scrollIntoView({ behavior: 'smooth' });
     }
 
     return () => {
@@ -52,7 +53,7 @@ function App() {
   }, [currentSection]);
 
   const sections = {
-    home: <Home />,
+    home: <Home setCurrentSection={setCurrentSection} />,
     about: <About />,
     projects: <Projects />,
     contact: <Contact />,

@@ -47,7 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentSection, onSectionChang
 
   const sidebarContent = (
     <>
-      <div className="flex-1 flex flex-col gap-8">
+      <div className="flex-1 flex flex-col gap-8 mb-12">
         {menuItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -89,13 +89,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentSection, onSectionChang
             {theme === 'light' ? (language === 'en' ? 'Dark Mode' : 'Modo Oscuro') : (language === 'en' ? 'Light Mode' : 'Modo Claro')}
           </span>
         </button>
-        <button
+        {/* <button
           onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
-          className="p-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-3"
+          className="hide p-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-3"
         >
           <Languages size={24} />
           <span className="md:hidden lg:inline">{language === 'en' ? 'Español' : 'English'}</span>
-        </button>
+        </button> */}
       </div>
     </>
   );

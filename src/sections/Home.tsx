@@ -2,7 +2,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Code2, Database, Globe, Server, Cpu, Cloud, Layers, Terminal } from 'lucide-react';
 
-export const Home: React.FC = () => {
+interface HomeProps {
+  setCurrentSection: (section: string) => void;
+}
+
+export const Home: React.FC<HomeProps> = ({setCurrentSection}) => {
   const backgroundIcons = [
     { Icon: Code2, position: "top-1/4 left-1/4" },
     { Icon: Database, position: "top-1/3 right-1/4" },
@@ -55,7 +59,7 @@ export const Home: React.FC = () => {
             <motion.a
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              href="#contact"
+              onClick={() => setCurrentSection('contact')}
               className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Get in Touch
@@ -63,7 +67,7 @@ export const Home: React.FC = () => {
             <motion.a
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              href="#projects"
+              onClick={() => setCurrentSection('projects')}
               className="px-8 py-3 border-2 border-blue-600 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-600 hover:text-white transition-colors"
             >
               View Projects
@@ -79,7 +83,7 @@ export const Home: React.FC = () => {
           <div className="relative w-80 h-80 mx-auto">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur-2xl opacity-20"></div>
             <img
-              src="src/img/MAIN_PHOTO.jpg"
+              src="/src/img/MAIN_PHOTO.jpg"
               alt="Profile"
               className="relative w-full h-full rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-xl"
             />

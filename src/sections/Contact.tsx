@@ -8,8 +8,8 @@ export const Contact: React.FC = () => {
     email: 'ocoyladev@gmail.com',
     phone: '+51 906589869',
     location: 'Perú',
-    github: 'https://github.com/yourusername',
-    linkedin: 'https://linkedin.com/in/yourusername',
+    github: 'https://github.com/ocoyladev',
+    linkedin: 'https://linkedin.com/in/ocoyladev',
   };
 
   const contactCards = [
@@ -40,23 +40,23 @@ export const Contact: React.FC = () => {
       hoverColor: 'hover:bg-purple-200 dark:hover:bg-purple-900',
       textColor: 'text-purple-800 dark:text-purple-200',
     },
-    {
-      icon: Phone,
-      label: 'Phone',
-      value: contactInfo.phone,
-      href: `tel:${contactInfo.phone.replace(/\s/g, '')}`,
-      color: 'bg-green-100 dark:bg-green-900/50',
-      hoverColor: 'hover:bg-green-200 dark:hover:bg-green-900',
-      textColor: 'text-green-800 dark:text-green-200',
-    },
-    {
-      icon: MapPin,
-      label: 'Location',
-      value: contactInfo.location,
-      color: 'bg-red-100 dark:bg-red-900/50',
-      hoverColor: 'hover:bg-red-200 dark:hover:bg-red-900',
-      textColor: 'text-red-800 dark:text-red-200',
-    },
+    // {
+    //   icon: Phone,
+    //   label: 'Phone',
+    //   value: contactInfo.phone,
+    //   href: `tel:${contactInfo.phone.replace(/\s/g, '')}`,
+    //   color: 'bg-green-100 dark:bg-green-900/50',
+    //   hoverColor: 'hover:bg-green-200 dark:hover:bg-green-900',
+    //   textColor: 'text-green-800 dark:text-green-200',
+    // },
+    // {
+    //   icon: MapPin,
+    //   label: 'Location',
+    //   value: contactInfo.location,
+    //   color: 'bg-red-100 dark:bg-red-900/50',
+    //   hoverColor: 'hover:bg-red-200 dark:hover:bg-red-900',
+    //   textColor: 'text-red-800 dark:text-red-200',
+    // },
   ];
 
   return (
@@ -95,7 +95,7 @@ export const Contact: React.FC = () => {
             <motion.a
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              href="/path-to-your-cv.pdf"
+              href="/src/file/RESUME.pdf"
               download
               className="flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors shadow-lg"
             >
