@@ -1,0 +1,35 @@
+{
+  "name": "Projects (Node JS) - DevContainer",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "remoteUser": "node",
+
+  // Si tu proyecto es Vite/React/Next/Nest, abre los puertos más comunes
+  "forwardPorts": [5173, 3000, 4000],
+  "portsAttributes": {
+    "5173": { "label": "Vite dev server" },
+    "3000": { "label": "Web App (Next/Express/Nest)" },
+    "4000": { "label": "API (Express/Nest)" }
+  },
+
+  // Para que Vite/Watchers funcionen bien con volúmenes en Windows
+  "containerEnv": {
+    "HOST": "0.0.0.0",
+    "CHOKIDAR_USEPOLLING": "true"
+  },
+
+  // Se ejecuta al crear el contenedor por primera vez
+  "postCreateCommand": "corepack enable || true && npm install",
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  }
+}
