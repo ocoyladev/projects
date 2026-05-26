@@ -9,36 +9,42 @@ import { t } from '../data/translations';
 import { ExperienceCard } from '../components/ExperienceCard';
 import { SkillGroup } from '../components/SkillGroup';
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.08 } }),
-};
-
 export const About: React.FC = () => {
   const { language } = useStore();
   const tr = t[language];
 
   return (
-    <div className="min-h-screen py-16 px-4 overflow-y-auto">
+    <div className="relative min-h-[100dvh] w-full py-20 sm:py-24 px-6 sm:px-8 md:px-12">
       <div className="max-w-5xl mx-auto">
-        <motion.h2
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-bold mb-12 text-slate-900 dark:text-slate-50"
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.5 }}
+          className="mb-10 sm:mb-12"
         >
-          {tr.about.heading}
-        </motion.h2>
+          <div className="flex items-center gap-2 section-tag text-slate-500 dark:text-slate-500 mb-2">
+            <span className="text-blue-500 dark:text-blue-400">{'//'}</span>
+            <span>02 · about</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-50">
+            {tr.about.heading}
+          </h2>
+        </motion.div>
 
         {/* Experience */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.5 }}
           className="mb-14"
         >
           <div className="flex items-center gap-2.5 mb-6">
-            <Briefcase size={20} className="text-blue-500" />
-            <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200">{tr.about.experienceHeading}</h3>
+            <Briefcase size={18} className="text-blue-500" />
+            <h3 className="text-lg sm:text-xl font-semibold text-slate-800 dark:text-slate-200">
+              {tr.about.experienceHeading}
+            </h3>
           </div>
           <div>
             {experience.map((exp, i) => (
@@ -50,46 +56,58 @@ export const About: React.FC = () => {
         {/* Technical Skills */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.5 }}
           className="mb-14"
         >
           <div className="flex items-center gap-2.5 mb-6">
-            <Code2 size={20} className="text-purple-500" />
-            <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200">{tr.about.skillsHeading}</h3>
+            <Code2 size={18} className="text-purple-500" />
+            <h3 className="text-lg sm:text-xl font-semibold text-slate-800 dark:text-slate-200">
+              {tr.about.skillsHeading}
+            </h3>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {skillGroups.map((group, i) => (
-              <motion.div key={group.category} custom={i} variants={fadeUp} initial="hidden" animate="visible">
+              <motion.div
+                key={group.category}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.4, delay: i * 0.06 }}
+              >
                 <SkillGroup group={group} />
               </motion.div>
             ))}
           </div>
         </motion.section>
 
-        {/* Education & Certifications */}
+        {/* Education */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.5 }}
         >
           <div className="flex items-center gap-2.5 mb-6">
-            <BookOpen size={20} className="text-emerald-500" />
-            <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200">{tr.about.educationHeading}</h3>
+            <BookOpen size={18} className="text-emerald-500" />
+            <h3 className="text-lg sm:text-xl font-semibold text-slate-800 dark:text-slate-200">
+              {tr.about.educationHeading}
+            </h3>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             {education.map((edu, i) => (
               <motion.div
                 key={i}
-                custom={i}
-                variants={fadeUp}
-                initial="hidden"
-                animate="visible"
-                className="bg-white/5 dark:bg-white/[0.03] border border-white/10 dark:border-white/5 rounded-xl p-4 hover:border-white/20 transition-colors duration-300"
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.4, delay: i * 0.06 }}
+                className="bg-white/60 dark:bg-white/[0.03] border border-slate-200 dark:border-white/8 rounded-xl p-4 hover:border-blue-400 dark:hover:border-white/20 transition-colors duration-300"
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <span
-                    className={`text-xs font-semibold uppercase tracking-widest px-2 py-0.5 rounded ${
+                    className={`section-tag px-2 py-0.5 rounded ${
                       edu.type === 'degree'
                         ? 'bg-blue-500/10 text-blue-500 dark:text-blue-400'
                         : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
@@ -98,10 +116,12 @@ export const About: React.FC = () => {
                     {edu.type === 'degree' ? tr.about.degree : tr.about.certification}
                   </span>
                   {edu.year && (
-                    <span className="text-xs text-slate-400 dark:text-slate-600 shrink-0">{edu.year}</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-600 shrink-0 font-mono">{edu.year}</span>
                   )}
                 </div>
-                <p className="font-medium text-slate-800 dark:text-slate-200 text-sm leading-snug mb-1">{edu.name}</p>
+                <p className="font-medium text-slate-800 dark:text-slate-200 text-sm leading-snug mb-1">
+                  {edu.name}
+                </p>
                 <div className="flex items-center gap-1.5">
                   <Award size={12} className="text-slate-400 dark:text-slate-600" />
                   <p className="text-xs text-slate-500 dark:text-slate-500">{edu.institution}</p>

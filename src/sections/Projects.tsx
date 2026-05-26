@@ -10,26 +10,35 @@ export const Projects: React.FC = () => {
   const tr = t[language];
 
   return (
-    <div className="min-h-screen py-16 px-4 overflow-y-auto">
+    <div className="relative min-h-[100dvh] w-full py-20 sm:py-24 px-6 sm:px-8 md:px-12">
       <div className="max-w-6xl mx-auto">
-        <motion.h2
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-bold mb-10 text-slate-900 dark:text-slate-50"
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.5 }}
+          className="mb-10 sm:mb-12"
         >
-          {tr.projects.heading}
-        </motion.h2>
+          <div className="flex items-center gap-2 section-tag text-slate-500 dark:text-slate-500 mb-2">
+            <span className="text-blue-500 dark:text-blue-400">{'//'}</span>
+            <span>03 · projects</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-50">
+            {tr.projects.heading}
+          </h2>
+        </motion.div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {projects.map((project, i) => (
             <motion.div
               key={project.id}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
               transition={{ delay: i * 0.07, duration: 0.45 }}
               className="h-full"
             >
-              <ProjectCard project={project} />
+              <ProjectCard project={project} index={i + 1} />
             </motion.div>
           ))}
         </div>

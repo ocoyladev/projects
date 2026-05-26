@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useStore } from './store/useStore';
 import { Sidebar } from './components/Sidebar';
 import { Home } from './sections/Home';
@@ -7,12 +7,17 @@ import { Projects } from './sections/Projects';
 import { Contact } from './sections/Contact';
 
 const SECTIONS = ['home', 'about', 'projects', 'contact'] as const;
-type Section = typeof SECTIONS[number];
+type Section = (typeof SECTIONS)[number];
 
 function App() {
   const [currentSection, setCurrentSection] = useState<Section>('home');
   const { theme } = useStore();
-  const lastScrollTime = useRef(Date.now());
+  const sectionRefs = useRef<Record<Section, HTMLElement | null>>({
+    home: null,
+    about: null,
+    projects: null,
+    contact: null,
+  });
 
   useEffect(() => {
     const html = document.documentElement;
@@ -31,53 +36,56 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      const now = Date.now();
-      if (now - lastScrollTime.current < 600) return;
-      lastScrollTime.current = now;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        let best: IntersectionObserverEntry | null = null;
+        for (const e of entries) {
+          if (e.isIntersecting && (!best || e.intersectionRatio > best.intersectionRatio)) {
+            best = e;
+          }
+        }
+        if (best) {
+          const id = (best.target as HTMLElement).dataset.section as Section;
+          if (id) setCurrentSection(id);
+        }
+      },
+      { threshold: [0.4, 0.6, 0.8] }
+    );
 
-      const currentIndex = SECTIONS.indexOf(currentSection);
-      if (e.deltaY > 0 && currentIndex < SECTIONS.length - 1) {
-        setCurrentSection(SECTIONS[currentIndex + 1]);
-      } else if (e.deltaY < 0 && currentIndex > 0) {
-        setCurrentSection(SECTIONS[currentIndex - 1]);
-      }
-    };
+    SECTIONS.forEach((s) => {
+      const el = sectionRefs.current[s];
+      if (el) observer.observe(el);
+    });
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const now = Date.now();
-      if (now - lastScrollTime.current < 600) return;
-      const currentIndex = SECTIONS.indexOf(currentSection);
-      if ((e.key === 'ArrowDown' || e.key === 'PageDown') && currentIndex < SECTIONS.length - 1) {
-        lastScrollTime.current = now;
-        setCurrentSection(SECTIONS[currentIndex + 1]);
-      } else if ((e.key === 'ArrowUp' || e.key === 'PageUp') && currentIndex > 0) {
-        lastScrollTime.current = now;
-        setCurrentSection(SECTIONS[currentIndex - 1]);
-      }
-    };
+    return () => observer.disconnect();
+  }, []);
 
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [currentSection]);
-
-  const sectionComponents: Record<Section, React.ReactNode> = {
-    home: <Home setCurrentSection={setCurrentSection} />,
-    about: <About />,
-    projects: <Projects />,
-    contact: <Contact />,
-  };
+  const goTo = useCallback((s: string) => {
+    const target = sectionRefs.current[s as Section];
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   return (
-    <div className="bg-slate-50 dark:bg-[#080810] min-h-screen transition-colors duration-300">
-      <Sidebar currentSection={currentSection} onSectionChange={setCurrentSection} />
-      <main className="md:pl-20 lg:pl-64 min-h-screen">
-        {sectionComponents[currentSection]}
+    <div className="bg-slate-50 dark:bg-[#070710] transition-colors duration-300">
+      <Sidebar currentSection={currentSection} onSectionChange={goTo} />
+      <main className="md:pl-20 lg:pl-64 h-[100dvh] overflow-y-auto snap-y snap-proximity scroll-smooth tech-scroll">
+        {(
+          [
+            { id: 'home' as const, node: <Home setCurrentSection={goTo} /> },
+            { id: 'about' as const, node: <About /> },
+            { id: 'projects' as const, node: <Projects /> },
+            { id: 'contact' as const, node: <Contact /> },
+          ]
+        ).map(({ id, node }) => (
+          <section
+            key={id}
+            ref={(el) => (sectionRefs.current[id] = el)}
+            data-section={id}
+            className="snap-start min-h-[100dvh] w-full"
+          >
+            {node}
+          </section>
+        ))}
       </main>
     </div>
   );
