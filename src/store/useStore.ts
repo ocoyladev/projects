@@ -10,7 +10,7 @@ interface Store {
 
 export const useStore = create<Store>((set) => ({
   language: 'en',
-  theme: 'light',
+  theme: 'dark',
   setLanguage: (language) => set({ language }),
   setTheme: (theme) => set({ theme }),
 }));

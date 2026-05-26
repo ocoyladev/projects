@@ -1,11 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <link rel="icon" tipo="imagen/png" href="/src/icon/S-removebg-preview.png">
+    <meta name="color-scheme" content="dark light">
+    <script>
+      {
+        const saved = localStorage.getItem('color-scheme');
+        const meta = document.querySelector('meta[name="color-scheme"]');
+        const html = document.documentElement;
+        if (saved === 'light') {
+          html.classList.remove('dark');
+          html.classList.add('light');
+          if (meta) meta.content = 'light';
+        } else {
+          html.classList.add('dark');
+          if (meta) meta.content = 'dark';
+        }
+      }
+    </script>
+    <link rel="icon" type="image/png" href="/src/icon/S-removebg-preview.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ocudev</title>
+    <meta name="description" content="Oscar Coyla — Power Automate / RPA Specialist & Full Stack Developer. 5+ years automating workflows and building modern web applications." />
+    <title>Oscar Coyla · Dev Portfolio</title>
   </head>
   <body>
     <div id="root"></div>

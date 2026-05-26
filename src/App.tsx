@@ -6,53 +6,67 @@ import { About } from './sections/About';
 import { Projects } from './sections/Projects';
 import { Contact } from './sections/Contact';
 
+const SECTIONS = ['home', 'about', 'projects', 'contact'] as const;
+type Section = typeof SECTIONS[number];
+
 function App() {
-  const [currentSection, setCurrentSection] = useState('home');
+  const [currentSection, setCurrentSection] = useState<Section>('home');
   const { theme } = useStore();
-  const sectionsRef = useRef<HTMLDivElement>(null);
   const lastScrollTime = useRef(Date.now());
-  // const scrollTimeout = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
+    const html = document.documentElement;
+    const meta = document.querySelector('meta[name="color-scheme"]');
     if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
+      html.classList.add('dark');
+      html.classList.remove('light');
+      if (meta) meta.setAttribute('content', 'dark');
+      localStorage.setItem('color-scheme', 'dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      html.classList.remove('dark');
+      html.classList.add('light');
+      if (meta) meta.setAttribute('content', 'light');
+      localStorage.setItem('color-scheme', 'light');
     }
   }, [theme]);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
-      
       const now = Date.now();
-      if (now - lastScrollTime.current < 1) return;
+      if (now - lastScrollTime.current < 600) return;
       lastScrollTime.current = now;
 
-      const sections = ['home', 'about', 'projects', 'contact'];
-      const currentIndex = sections.indexOf(currentSection);
-      
-      if (e.deltaY > 0 && currentIndex < sections.length - 1) {
-        setCurrentSection(sections[currentIndex + 1]);
+      const currentIndex = SECTIONS.indexOf(currentSection);
+      if (e.deltaY > 0 && currentIndex < SECTIONS.length - 1) {
+        setCurrentSection(SECTIONS[currentIndex + 1]);
       } else if (e.deltaY < 0 && currentIndex > 0) {
-        setCurrentSection(sections[currentIndex - 1]);
+        setCurrentSection(SECTIONS[currentIndex - 1]);
       }
     };
 
-    const sectionElement = sectionsRef.current;
-    if (sectionElement) {
-      sectionElement.addEventListener('wheel', handleWheel, { passive: false });
-      sectionElement.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    return () => {
-      if (sectionElement) {
-        sectionElement.removeEventListener('wheel', handleWheel);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const now = Date.now();
+      if (now - lastScrollTime.current < 600) return;
+      const currentIndex = SECTIONS.indexOf(currentSection);
+      if ((e.key === 'ArrowDown' || e.key === 'PageDown') && currentIndex < SECTIONS.length - 1) {
+        lastScrollTime.current = now;
+        setCurrentSection(SECTIONS[currentIndex + 1]);
+      } else if ((e.key === 'ArrowUp' || e.key === 'PageUp') && currentIndex > 0) {
+        lastScrollTime.current = now;
+        setCurrentSection(SECTIONS[currentIndex - 1]);
       }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [currentSection]);
 
-  const sections = {
+  const sectionComponents: Record<Section, React.ReactNode> = {
     home: <Home setCurrentSection={setCurrentSection} />,
     about: <About />,
     projects: <Projects />,
@@ -60,10 +74,10 @@ function App() {
   };
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="bg-slate-50 dark:bg-[#080810] min-h-screen transition-colors duration-300">
       <Sidebar currentSection={currentSection} onSectionChange={setCurrentSection} />
-      <main className="md:pl-20 lg:pl-64" ref={sectionsRef}>
-        {sections[currentSection as keyof typeof sections]}
+      <main className="md:pl-20 lg:pl-64 min-h-screen">
+        {sectionComponents[currentSection]}
       </main>
     </div>
   );
