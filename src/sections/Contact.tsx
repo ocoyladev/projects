@@ -107,8 +107,8 @@ export const Contact: React.FC = () => {
           <motion.a
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            href="/src/file/RESUME.pdf"
-            download
+            href={`/src/file/RESUME_${language.toUpperCase()}.pdf`}
+            download={`Oscar_Coyla_RPA_Specialist_${language.toUpperCase()}.pdf`}
             className="flex items-center gap-2.5 px-6 sm:px-8 py-3 sm:py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-colors shadow-lg shadow-blue-500/20 text-sm"
           >
             <FileText className="h-4 w-4" />
