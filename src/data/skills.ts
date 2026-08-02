@@ -2,19 +2,33 @@ import { SkillGroup } from '../types';
 
 export const skillGroups: SkillGroup[] = [
   {
-    category: 'Automation & RPA',
+    category: 'Power Platform',
     color: 'orange',
     skills: [
       'Power Automate Cloud Flows',
-      'Power Automate Desktop',
+      'Power Automate Desktop (RPA)',
+      'Power Apps (Canvas & Model-Driven)',
+      'Dataverse',
+      'PCF Custom Components',
       'Custom Connectors',
+      'Center of Excellence (CoE)',
+      'ALM & Solutions',
       'SharePoint',
       'Outlook',
       'Teams',
-      'Power Apps',
-      'Dataverse',
+    ],
+  },
+  {
+    category: 'Automation & RPA',
+    color: 'red',
+    skills: [
+      'Desktop UI automation (pywinauto / pyautogui)',
+      'Session-based HTTP automation',
+      'HTML parsing (BeautifulSoup)',
+      'Playwright / Selenium',
       'REST & SOAP APIs',
-      'Session-based HTTP Auth',
+      'Document pipelines (pandas, openpyxl, win32com)',
+      'PyInstaller packaging',
     ],
   },
   {
@@ -25,17 +39,17 @@ export const skillGroups: SkillGroup[] = [
   {
     category: 'Frontend',
     color: 'purple',
-    skills: ['React', 'Vite', 'TailwindCSS', 'shadcn/ui', 'TanStack Query', 'React Router', 'Framer Motion'],
+    skills: ['React', 'Vite', 'TailwindCSS', 'AG Grid', 'shadcn/ui', 'TanStack Query', 'React Router', 'Framer Motion'],
   },
   {
     category: 'Backend',
     color: 'green',
-    skills: ['NestJS', 'Node.js', 'Spring Boot', 'TypeORM', 'Spring Cloud', 'FastAPI', 'Eureka', 'API Gateway'],
+    skills: ['FastAPI', 'WebSocket', 'Async job orchestration', 'NestJS', 'Node.js', 'Spring Boot', 'TypeORM', 'Spring Cloud', 'API Gateway'],
   },
   {
-    category: 'Databases',
+    category: 'Databases & Testing',
     color: 'yellow',
-    skills: ['PostgreSQL', 'MySQL', 'SQLite', 'Firebase'],
+    skills: ['PostgreSQL', 'MySQL', 'SQLite', 'Oracle', 'Firebase', 'pytest', 'Vitest'],
   },
   {
     category: 'Cloud & DevOps',

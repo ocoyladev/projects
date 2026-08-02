@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useStore } from './store/useStore';
 import { Sidebar } from './components/Sidebar';
 import { Home } from './sections/Home';

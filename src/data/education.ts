@@ -8,6 +8,30 @@ export const education: Education[] = [
     year: 'Mar 2025 – Jan 2026',
   },
   {
+    type: 'degree',
+    name: 'Certified Tech Developer',
+    institution: 'Digital House',
+    year: '2023 – 2024',
+  },
+  {
+    type: 'degree',
+    name: 'Bachelor of Law',
+    institution: 'Universidad Nacional de San Agustín',
+    year: '2018',
+  },
+  {
+    type: 'certification',
+    name: 'Power Platform Fundamentals (PL-900)',
+    institution: 'Microsoft',
+    year: 'Aug 2026',
+  },
+  {
+    type: 'certification',
+    name: 'Power Platform Developer Associate (PL-400)',
+    institution: 'Microsoft',
+    year: 'In progress',
+  },
+  {
     type: 'certification',
     name: 'Associate Cloud Engineer',
     institution: 'Google Cloud',
