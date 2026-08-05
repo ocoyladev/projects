@@ -11,7 +11,7 @@ type Section = (typeof SECTIONS)[number];
 
 function App() {
   const [currentSection, setCurrentSection] = useState<Section>('home');
-  const { theme } = useStore();
+  const { theme, language } = useStore();
   const sectionRefs = useRef<Record<Section, HTMLElement | null>>({
     home: null,
     about: null,
@@ -34,6 +34,12 @@ function App() {
       localStorage.setItem('color-scheme', 'light');
     }
   }, [theme]);
+
+  // Keep the document language in sync so screen readers and translation tools
+  // announce the page in the language the visitor actually selected.
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

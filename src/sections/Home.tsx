@@ -1,23 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, ChevronDown } from 'lucide-react';
-import { useStore } from '../store/useStore';
 import { profile } from '../data/profile';
-import { t } from '../data/translations';
+import { useLang } from '../lib/i18n';
 
 interface HomeProps {
   setCurrentSection: (section: string) => void;
 }
 
 export const Home: React.FC<HomeProps> = ({ setCurrentSection }) => {
-  const { language } = useStore();
-  const tr = t[language];
-
-  // Short summary for mobile, full for tablet+
-  const shortSummary =
-    language === 'es'
-      ? 'Especialista en Power Automate / RPA y Full Stack Dev con 5+ años automatizando flujos para el sector público.'
-      : '5+ years engineering automated workflows and full-stack apps for the public sector. Power Automate / RPA + modern web.';
+  const { tr, loc } = useLang();
 
   return (
     <div className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden tech-grid">
@@ -51,21 +43,23 @@ export const Home: React.FC<HomeProps> = ({ setCurrentSection }) => {
           </h1>
 
           <div className="mb-4 sm:mb-5 leading-tight">
-            <span className="text-lg sm:text-xl md:text-2xl font-semibold gradient-text">{profile.title}</span>
+            <span className="text-lg sm:text-xl md:text-2xl font-semibold gradient-text">
+              {loc(profile.title)}
+            </span>
             <span className="text-slate-400 dark:text-slate-600 mx-2 hidden sm:inline">·</span>
             <span className="block sm:inline text-base sm:text-lg md:text-xl text-slate-500 dark:text-slate-400 mt-1 sm:mt-0">
-              {profile.subtitle}
+              {loc(profile.subtitle)}
             </span>
           </div>
 
           {/* Short summary — mobile only */}
           <p className="md:hidden text-sm text-slate-600 dark:text-slate-400 mb-5 leading-relaxed max-w-md mx-auto">
-            {shortSummary}
+            {loc(profile.shortSummary)}
           </p>
 
           {/* Full summary — tablet+ */}
           <p className="hidden md:block text-base text-slate-600 dark:text-slate-400 mb-6 leading-relaxed max-w-xl">
-            {language === 'es' ? profile.summaryEs : profile.summary}
+            {loc(profile.summary)}
           </p>
 
           {/* Availability badge */}
@@ -112,8 +106,11 @@ export const Home: React.FC<HomeProps> = ({ setCurrentSection }) => {
             <div className="absolute -bottom-2 -right-2 w-5 h-5 border-b-2 border-r-2 border-violet-500/60 rounded-br-lg hidden md:block" />
             <div className="relative w-full h-full rounded-full overflow-hidden ring-2 ring-white/10 dark:ring-white/8 shadow-2xl">
               <img
-                src="/src/img/MAIN_PHOTO.jpg"
+                src="/src/img/MAIN_PHOTO.webp"
                 alt={profile.name}
+                width={640}
+                height={800}
+                fetchPriority="high"
                 className="w-full h-full object-cover"
               />
             </div>

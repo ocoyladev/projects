@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Experience } from '../types';
+import { useLang } from '../lib/i18n';
 
 interface ExperienceCardProps {
   experience: Experience;
@@ -8,6 +9,8 @@ interface ExperienceCardProps {
 }
 
 export const ExperienceCard: React.FC<ExperienceCardProps> = ({ experience, index }) => {
+  const { loc } = useLang();
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -23,17 +26,23 @@ export const ExperienceCard: React.FC<ExperienceCardProps> = ({ experience, inde
       <div className="bg-white/5 dark:bg-white/[0.03] border border-white/10 dark:border-white/5 rounded-xl p-5 hover:border-blue-500/30 transition-colors duration-300">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 mb-3">
           <div>
-            <h4 className="font-semibold text-slate-900 dark:text-slate-100 text-base">{experience.role}</h4>
-            <span className="text-blue-600 dark:text-blue-400 font-medium text-sm">{experience.company}</span>
+            <h4 className="font-semibold text-slate-900 dark:text-slate-100 text-base">
+              {loc(experience.role)}
+            </h4>
+            <span className="text-blue-600 dark:text-blue-400 font-medium text-sm">
+              {experience.company}
+            </span>
           </div>
           <div className="text-right shrink-0">
-            <p className="text-xs text-slate-500 dark:text-slate-500 font-medium">{experience.period}</p>
-            <p className="text-xs text-slate-400 dark:text-slate-600">{experience.location}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-500 font-medium">
+              {loc(experience.period)}
+            </p>
+            <p className="text-xs text-slate-400 dark:text-slate-600">{loc(experience.location)}</p>
           </div>
         </div>
         <ul className="space-y-2">
-          {experience.bullets.map((bullet, i) => (
-            <li key={i} className="flex gap-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+          {loc(experience.bullets).map((bullet) => (
+            <li key={bullet} className="flex gap-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
               <span className="text-blue-500 dark:text-blue-500 mt-0.5 shrink-0">▸</span>
               {bullet}
             </li>

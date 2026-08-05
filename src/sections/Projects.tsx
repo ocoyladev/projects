@@ -2,12 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ProjectCard } from '../components/ProjectCard';
 import { projects } from '../data/projects';
-import { useStore } from '../store/useStore';
-import { t } from '../data/translations';
+import { useLang } from '../lib/i18n';
 
 export const Projects: React.FC = () => {
-  const { language } = useStore();
-  const tr = t[language];
+  const { tr } = useLang();
 
   return (
     <div className="relative min-h-[100dvh] w-full py-20 sm:py-24 px-6 sm:px-8 md:px-12">

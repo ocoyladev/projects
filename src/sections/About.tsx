@@ -1,17 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Code2, BookOpen, Award } from 'lucide-react';
-import { useStore } from '../store/useStore';
+import { Briefcase, Code2, BookOpen, Award, Languages } from 'lucide-react';
 import { experience } from '../data/experience';
 import { skillGroups } from '../data/skills';
-import { education } from '../data/education';
-import { t } from '../data/translations';
+import { education, spokenLanguages } from '../data/education';
+import { useLang } from '../lib/i18n';
 import { ExperienceCard } from '../components/ExperienceCard';
 import { SkillGroup } from '../components/SkillGroup';
 
 export const About: React.FC = () => {
-  const { language } = useStore();
-  const tr = t[language];
+  const { tr, loc } = useLang();
 
   return (
     <div className="relative min-h-[100dvh] w-full py-20 sm:py-24 px-6 sm:px-8 md:px-12">
@@ -61,7 +59,7 @@ export const About: React.FC = () => {
           transition={{ duration: 0.5 }}
           className="mb-14"
         >
-          <div className="flex items-center gap-2.5 mb-6">
+          <div className="flex items-center gap-2.5 mb-6" id="skills">
             <Code2 size={18} className="text-purple-500" />
             <h3 className="text-lg sm:text-xl font-semibold text-slate-800 dark:text-slate-200">
               {tr.about.skillsHeading}
@@ -70,7 +68,7 @@ export const About: React.FC = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {skillGroups.map((group, i) => (
               <motion.div
-                key={group.category}
+                key={group.category.en}
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
@@ -88,6 +86,7 @@ export const About: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.5 }}
+          className="mb-14"
         >
           <div className="flex items-center gap-2.5 mb-6">
             <BookOpen size={18} className="text-emerald-500" />
@@ -98,7 +97,7 @@ export const About: React.FC = () => {
           <div className="grid sm:grid-cols-2 gap-4">
             {education.map((edu, i) => (
               <motion.div
-                key={i}
+                key={loc(edu.name)}
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
@@ -116,16 +115,52 @@ export const About: React.FC = () => {
                     {edu.type === 'degree' ? tr.about.degree : tr.about.certification}
                   </span>
                   {edu.year && (
-                    <span className="text-xs text-slate-400 dark:text-slate-600 shrink-0 font-mono">{edu.year}</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-600 shrink-0 font-mono">
+                      {loc(edu.year)}
+                    </span>
                   )}
                 </div>
                 <p className="font-medium text-slate-800 dark:text-slate-200 text-sm leading-snug mb-1">
-                  {edu.name}
+                  {loc(edu.name)}
                 </p>
                 <div className="flex items-center gap-1.5">
                   <Award size={12} className="text-slate-400 dark:text-slate-600" />
                   <p className="text-xs text-slate-500 dark:text-slate-500">{edu.institution}</p>
                 </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Spoken languages */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex items-center gap-2.5 mb-6">
+            <Languages size={18} className="text-cyan-500" />
+            <h3 className="text-lg sm:text-xl font-semibold text-slate-800 dark:text-slate-200">
+              {tr.about.languagesHeading}
+            </h3>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {spokenLanguages.map((lang, i) => (
+              <motion.div
+                key={loc(lang.name)}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.4, delay: i * 0.06 }}
+                className="bg-white/60 dark:bg-white/[0.03] border border-slate-200 dark:border-white/8 rounded-xl p-4 hover:border-blue-400 dark:hover:border-white/20 transition-colors duration-300"
+              >
+                <p className="font-medium text-slate-800 dark:text-slate-200 text-sm mb-1">
+                  {loc(lang.name)}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-500 leading-relaxed">
+                  {loc(lang.level)}
+                </p>
               </motion.div>
             ))}
           </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { SkillGroup as SkillGroupType } from '../types';
+import { useLang } from '../lib/i18n';
 
 interface SkillGroupProps {
   group: SkillGroupType;
@@ -34,14 +35,15 @@ const colorMap = {
 
 export const SkillGroup: React.FC<SkillGroupProps> = ({ group }) => {
   const colors = colorMap[group.color];
+  const { loc } = useLang();
 
   return (
     <div className="bg-white/5 dark:bg-white/[0.03] border border-white/10 dark:border-white/5 rounded-xl p-4 hover:border-white/20 transition-colors duration-300">
       <h4 className={`text-xs font-semibold uppercase tracking-widest mb-3 ${colors.header}`}>
-        {group.category}
+        {loc(group.category)}
       </h4>
       <div className="flex flex-wrap gap-1.5">
-        {group.skills.map((skill) => (
+        {loc(group.skills).map((skill) => (
           <span
             key={skill}
             className={`px-2.5 py-1 rounded-md text-xs font-medium ${colors.badge}`}

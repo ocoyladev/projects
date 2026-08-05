@@ -2,12 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Github, Linkedin, Mail, FileText, Award } from 'lucide-react';
 import { profile } from '../data/profile';
-import { useStore } from '../store/useStore';
-import { t } from '../data/translations';
+import { useLang } from '../lib/i18n';
 
 export const Contact: React.FC = () => {
-  const { language } = useStore();
-  const tr = t[language];
+  const { language, tr } = useLang();
 
   const contactCards = [
     {
@@ -77,24 +75,28 @@ export const Contact: React.FC = () => {
         </motion.div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          {contactCards.map(({ icon: Icon, label, value, href, accent, iconColor, hover }, i) => (
-            <motion.div
-              key={label}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ delay: i * 0.06, duration: 0.4 }}
-              whileHover={{ y: -4 }}
-              className={`p-4 sm:p-5 rounded-2xl border cursor-pointer transition-all duration-300 ${accent} ${hover}`}
-              onClick={() => href && window.open(href, '_blank')}
-            >
-              <Icon className={`h-5 w-5 sm:h-6 sm:w-6 mb-3 ${iconColor}`} />
-              <h3 className="font-semibold text-slate-800 dark:text-slate-200 text-xs sm:text-sm mb-0.5">
-                {label}
-              </h3>
-              <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-500 truncate">{value}</p>
-            </motion.div>
-          ))}
+          {contactCards.map(({ icon: Icon, label, value, href, accent, iconColor, hover }, i) => {
+            const external = !href.startsWith('mailto:');
+            return (
+              <motion.a
+                key={label}
+                href={href}
+                {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ delay: i * 0.06, duration: 0.4 }}
+                whileHover={{ y: -4 }}
+                className={`block p-4 sm:p-5 rounded-2xl border transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${accent} ${hover}`}
+              >
+                <Icon className={`h-5 w-5 sm:h-6 sm:w-6 mb-3 ${iconColor}`} />
+                <h3 className="font-semibold text-slate-800 dark:text-slate-200 text-xs sm:text-sm mb-0.5">
+                  {label}
+                </h3>
+                <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-500 truncate">{value}</p>
+              </motion.a>
+            );
+          })}
         </div>
 
         <motion.div

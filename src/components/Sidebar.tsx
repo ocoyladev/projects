@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Home, User, FolderGit2, Mail, Sun, Moon, Languages, Menu, X } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { t } from '../data/translations';
+import { useLang } from '../lib/i18n';
 
 interface SidebarProps {
   currentSection: string;
@@ -10,11 +10,11 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ currentSection, onSectionChange }) => {
-  const { theme, setTheme, language, setLanguage } = useStore();
+  const { theme, setTheme, setLanguage } = useStore();
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
-  const tr = t[language];
+  const { language, tr } = useLang();
 
   const menuItems = [
     { id: 'home', icon: Home, label: tr.nav.home, tooltip: tr.nav.tooltipHome },
@@ -107,7 +107,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentSection, onSectionChang
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="md:hidden fixed bottom-6 right-6 z-50 p-4 bg-blue-600 text-white rounded-full shadow-xl shadow-blue-500/30"
-        aria-label="Toggle menu"
+        aria-label={isOpen ? tr.nav.closeMenu : tr.nav.openMenu}
+        aria-expanded={isOpen}
       >
         {isOpen ? <X size={22} /> : <Menu size={22} />}
       </button>

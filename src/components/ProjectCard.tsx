@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ExternalLink, Github, ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react';
+import { X, ExternalLink, Github, ChevronLeft, ChevronRight, ArrowUpRight, Lock, Images, ZoomIn } from 'lucide-react';
 import { Project } from '../types';
-import { useStore } from '../store/useStore';
-import { t } from '../data/translations';
+import { useLang } from '../lib/i18n';
 
 interface ProjectCardProps {
   project: Project;
@@ -47,27 +46,93 @@ function ImagePlaceholder({ title, index }: { title: string; index: number }) {
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { language } = useStore();
-  const tr = t[language];
+  const { tr, loc } = useLang();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
 
   const hasImages = project.images.length > 0;
   const padded = String(index).padStart(2, '0');
+  const titleId = `project-${project.id}-title`;
 
-  const nextImage = () => setCurrentImageIndex((p) => (p + 1) % project.images.length);
-  const prevImage = () =>
-    setCurrentImageIndex((p) => (p - 1 + project.images.length) % project.images.length);
+  const close = useCallback(() => {
+    setIsZoomed(false);
+    setIsOpen(false);
+  }, []);
+  const nextImage = useCallback(
+    () => setCurrentImageIndex((p) => (p + 1) % project.images.length),
+    [project.images.length],
+  );
+  const prevImage = useCallback(
+    () => setCurrentImageIndex((p) => (p - 1 + project.images.length) % project.images.length),
+    [project.images.length],
+  );
+
+  const open = () => {
+    openerRef.current = document.activeElement as HTMLElement | null;
+    setCurrentImageIndex(0);
+    setIsOpen(true);
+  };
+
+  // Modal behaviour: lock the page behind it, keep focus inside, and wire the
+  // keys people actually reach for (Esc to leave, arrows through the gallery).
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const { overflow } = document.body.style;
+    document.body.style.overflow = 'hidden';
+    dialogRef.current?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        // Esc peels back one layer at a time: zoom first, then the dialog.
+        if (isZoomed) setIsZoomed(false);
+        else close();
+        return;
+      }
+      if (hasImages && project.images.length > 1) {
+        if (e.key === 'ArrowRight') nextImage();
+        if (e.key === 'ArrowLeft') prevImage();
+      }
+      if (e.key !== 'Tab') return;
+
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusable || focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.body.style.overflow = overflow;
+      openerRef.current?.focus();
+    };
+  }, [isOpen, isZoomed, hasImages, project.images.length, close, nextImage, prevImage]);
 
   return (
     <>
-      <motion.div
+      <motion.button
+        type="button"
         whileHover={{ y: -5 }}
         transition={{ type: 'spring', stiffness: 320, damping: 24 }}
-        className="relative bg-white dark:bg-white/[0.025] border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden cursor-pointer h-full flex flex-col group hover:border-blue-500/40 dark:hover:border-blue-500/40 hover:shadow-xl dark:hover:shadow-blue-500/10 transition-all duration-300"
-        onClick={() => setIsOpen(true)}
+        className="relative text-left bg-white dark:bg-white/[0.025] border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden cursor-pointer h-full w-full flex flex-col group hover:border-blue-500/40 dark:hover:border-blue-500/40 hover:shadow-xl dark:hover:shadow-blue-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all duration-300"
+        onClick={open}
+        aria-label={`${project.title} — ${tr.projects.openDetails}`}
       >
         {/* Top bar with mono index */}
-        <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-slate-100 dark:border-white/5">
+        <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-slate-100 dark:border-white/5 w-full">
           <span className="section-tag text-slate-400 dark:text-slate-600">
             <span className="text-blue-500/70 dark:text-blue-400/70">{'<'}</span>
             {padded}
@@ -80,25 +145,31 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
         </div>
 
         {/* Thumbnail */}
-        <div className="relative h-40 sm:h-44 overflow-hidden bg-slate-100 dark:bg-white/5 flex-shrink-0">
+        <div className="relative h-40 sm:h-44 w-full overflow-hidden bg-slate-100 dark:bg-white/5 flex-shrink-0">
           {hasImages ? (
             <img
               src={project.images[0]}
-              alt={project.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
             <ImagePlaceholder title={project.title} index={project.id} />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          {/* Headline outcome, so the card says something before it is opened */}
+          <span className="absolute bottom-2 left-2 right-2 px-2 py-1 rounded-md bg-black/55 backdrop-blur-sm text-[10px] sm:text-xs font-mono text-white/90 truncate">
+            {loc(project.metric)}
+          </span>
         </div>
 
-        <div className="p-4 sm:p-5 flex flex-col flex-1">
+        <div className="p-4 sm:p-5 flex flex-col flex-1 w-full">
           <h3 className="text-base font-semibold mb-1.5 text-slate-900 dark:text-slate-100 group-hover:gradient-text transition-all">
             {project.title}
           </h3>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-3 leading-relaxed flex-1">
-            {project.shortDescription}
+            {loc(project.shortDescription)}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {project.technologies.slice(0, 4).map((tech) => (
@@ -116,47 +187,75 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
             )}
           </div>
         </div>
-      </motion.div>
+      </motion.button>
 
       <AnimatePresence>
         {isOpen && (
           <div
             className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
-            onClick={() => setIsOpen(false)}
+            onClick={close}
           >
             <motion.div
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              tabIndex={-1}
               initial={{ scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.92, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 280, damping: 28 }}
-              className="bg-white dark:bg-[#0d0d1a] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden"
+              className="bg-white dark:bg-[#0d0d1a] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden focus:outline-none"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
-                {/* Gallery */}
-                <div className="md:w-1/2 flex-shrink-0 bg-slate-100 dark:bg-black/30 relative">
+                {/* Gallery — wider than the text pane, since the screenshots
+                    are landscape and shrinking them makes them unreadable */}
+                <div className="md:w-3/5 flex-shrink-0 bg-slate-100 dark:bg-black/30 relative">
                   <div className="relative h-56 md:h-full min-h-[200px]">
                     {hasImages ? (
                       <>
-                        <img
-                          src={project.images[currentImageIndex]}
-                          alt={project.title}
-                          className="w-full h-full object-cover"
-                        />
+                        {/* contain, not cover: these are UI screenshots and
+                            cropping them defeats the point of showing them */}
+                        <button
+                          type="button"
+                          onClick={() => setIsZoomed(true)}
+                          aria-label={tr.projects.zoom}
+                          className="group/zoom w-full h-full cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
+                        >
+                          <img
+                            src={project.images[currentImageIndex]}
+                            alt={`${project.title} — ${tr.projects.screenshot} ${currentImageIndex + 1}`}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-contain"
+                          />
+                          <span className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/60 text-white/90 text-[10px] font-mono opacity-0 group-hover/zoom:opacity-100 transition-opacity">
+                            <ZoomIn size={12} />
+                            {tr.projects.zoom}
+                          </span>
+                        </button>
                         {project.images.length > 1 && (
                           <>
                             <button
+                              type="button"
                               onClick={prevImage}
+                              aria-label={tr.projects.previousImage}
                               className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
                             >
                               <ChevronLeft size={20} />
                             </button>
                             <button
+                              type="button"
                               onClick={nextImage}
+                              aria-label={tr.projects.nextImage}
                               className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
                             >
                               <ChevronRight size={20} />
                             </button>
+                            <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/60 text-white/90 text-[10px] font-mono">
+                              {currentImageIndex + 1} / {project.images.length}
+                            </span>
                           </>
                         )}
                       </>
@@ -168,15 +267,18 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
                     <div className="flex gap-1.5 p-3 overflow-x-auto bg-black/10 dark:bg-black/20">
                       {project.images.map((img, i) => (
                         <button
-                          key={i}
+                          type="button"
+                          key={img}
                           onClick={() => setCurrentImageIndex(i)}
+                          aria-label={`${tr.projects.screenshot} ${i + 1}`}
+                          aria-current={i === currentImageIndex}
                           className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden transition-all ${
                             i === currentImageIndex
                               ? 'ring-2 ring-blue-500 opacity-100'
                               : 'opacity-50 hover:opacity-75'
                           }`}
                         >
-                          <img src={img} alt="" className="w-full h-full object-cover" />
+                          <img src={img} alt="" loading="lazy" className="w-full h-full object-cover object-top" />
                         </button>
                       ))}
                     </div>
@@ -184,7 +286,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
                 </div>
 
                 {/* Details */}
-                <div className="md:w-1/2 p-6 overflow-y-auto">
+                <div className="md:w-2/5 p-6 overflow-y-auto">
                   <div className="flex justify-between items-start mb-1">
                     <span className="section-tag text-slate-400 dark:text-slate-600">
                       <span className="text-blue-500/70 dark:text-blue-400/70">{'<'}</span>
@@ -192,19 +294,25 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
                       <span className="text-blue-500/70 dark:text-blue-400/70">{' />'}</span>
                     </span>
                     <button
-                      onClick={() => setIsOpen(false)}
+                      type="button"
+                      onClick={close}
+                      aria-label={tr.projects.closeDetails}
                       className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors -mt-1 -mr-1"
                     >
                       <X size={20} />
                     </button>
                   </div>
 
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
+                  <h2 id={titleId} className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
                     {project.title}
                   </h2>
 
+                  <p className="inline-block mb-4 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-mono">
+                    {loc(project.metric)}
+                  </p>
+
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
-                    {project.description}
+                    {loc(project.description)}
                   </p>
 
                   <div className="mb-6">
@@ -223,8 +331,29 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
                     </div>
                   </div>
 
+                  {project.demo.kind === 'private' && (
+                    <div className="mb-6 flex gap-2.5 p-3 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10">
+                      <Lock size={14} className="mt-0.5 shrink-0 text-slate-400 dark:text-slate-500" />
+                      <div>
+                        <h3 className="section-tag text-slate-400 dark:text-slate-600 mb-1">
+                          {tr.projects.whyNoDemo}
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                          {loc(project.demo.note)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {project.demo.kind === 'gallery' && hasImages && (
+                    <p className="mb-6 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                      <Images size={14} className="shrink-0 text-slate-400 dark:text-slate-500" />
+                      {tr.projects.walkthrough}
+                    </p>
+                  )}
+
                   <div className="flex flex-wrap gap-3">
-                    {project.liveUrl && (
+                    {project.demo.kind === 'live' && project.liveUrl && (
                       <a
                         href={project.liveUrl}
                         target="_blank"
@@ -250,6 +379,41 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
                 </div>
               </div>
             </motion.div>
+
+            {/* Full-bleed view: the screenshots carry the detail, so they need
+                to be readable at their captured size. */}
+            {isZoomed && hasImages && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[70] bg-black/92 flex items-center justify-center p-4 cursor-zoom-out"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsZoomed(false);
+                }}
+              >
+                <img
+                  src={project.images[currentImageIndex]}
+                  alt={`${project.title} — ${tr.projects.screenshot} ${currentImageIndex + 1}`}
+                  className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsZoomed(false);
+                  }}
+                  aria-label={tr.projects.closeDetails}
+                  className="absolute top-4 right-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+                <span className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-md bg-white/10 text-white/80 text-xs font-mono">
+                  {currentImageIndex + 1} / {project.images.length}
+                </span>
+              </motion.div>
+            )}
           </div>
         )}
       </AnimatePresence>
