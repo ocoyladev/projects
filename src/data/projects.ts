@@ -51,7 +51,10 @@ export const projects: Project[] = [
       es: 'SPA lista para producción para SITRAUS (Sindicato de Trabajadores de SUNAT). Portal público de 8 rutas con comunicados oficiales del sindicato paginados en servidor, galería de fotos con Lightbox, formulario de afiliación, página del proyecto de ley e inicio de sesión para afiliados. Diseño responsive mobile-first con menú hamburguesa animado. Construido con shadcn/ui, TanStack Query y React Router.',
     },
     technologies: ['React', 'TypeScript', 'Vite', 'TailwindCSS', 'shadcn/ui', 'TanStack Query', 'React Router'],
-    images: [],
+    images: [
+      '/src/img/sitraus/01-home.png',
+      '/src/img/sitraus/02-comunicados.png',
+    ],
     demo: { kind: 'live' },
     liveUrl: 'https://www.sitraus.org.pe',
   },
