@@ -44,6 +44,14 @@ function ImagePlaceholder({ title, index }: { title: string; index: number }) {
   );
 }
 
+function StageBadge({ label, className = '' }: { label: string; className?: string }) {
+  return (
+    <span className={`${className} px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] sm:text-xs font-mono`}>
+      {label}
+    </span>
+  );
+}
+
 export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -53,6 +61,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
   const openerRef = useRef<HTMLElement | null>(null);
 
   const hasImages = project.images.length > 0;
+  const stageLabel = project.stage === 'in-development' ? tr.projects.inDevelopment : null;
   const padded = String(index).padStart(2, '0');
   const titleId = `project-${project.id}-title`;
 
@@ -138,6 +147,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
             {padded}
             <span className="text-blue-500/70 dark:text-blue-400/70">{' />'}</span>
           </span>
+          {stageLabel && <StageBadge label={stageLabel} className="ml-auto mr-2" />}
           <ArrowUpRight
             size={14}
             className="text-slate-400 dark:text-slate-600 group-hover:text-blue-500 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"
@@ -307,9 +317,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
                     {project.title}
                   </h2>
 
-                  <p className="inline-block mb-4 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-mono">
-                    {loc(project.metric)}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2 mb-4">
+                    <p className="inline-block px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-mono">
+                      {loc(project.metric)}
+                    </p>
+                    {stageLabel && <StageBadge label={stageLabel} />}
+                  </div>
 
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
                     {loc(project.description)}

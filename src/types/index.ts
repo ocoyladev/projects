@@ -21,8 +21,15 @@ export type Demo =
   | { kind: 'gallery' }
   | { kind: 'private'; note: Localized };
 
+/**
+ * Maturity of a project. Absent means it shipped (MVP or beyond); a stage is
+ * set only when the work is real but unfinished, so the card says so up front.
+ */
+export type ProjectStage = 'in-development';
+
 export type Project = {
   id: number;
+  stage?: ProjectStage;
   /** Brand name — intentionally not localized. */
   title: string;
   shortDescription: Localized;

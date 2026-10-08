@@ -45,6 +45,7 @@ export const t = {
       whyNoDemo: 'Why there is no live demo',
       walkthrough: 'Screenshot walkthrough',
       zoom: 'Enlarge',
+      inDevelopment: 'In development',
     },
     contact: {
       heading: 'Get in Touch',
@@ -102,6 +103,7 @@ export const t = {
       whyNoDemo: 'Por qué no hay demo en vivo',
       walkthrough: 'Recorrido en capturas',
       zoom: 'Ampliar',
+      inDevelopment: 'En desarrollo',
     },
     contact: {
       heading: 'Contáctame',
