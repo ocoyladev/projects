@@ -46,6 +46,7 @@ export const t = {
       walkthrough: 'Screenshot walkthrough',
       zoom: 'Enlarge',
       inDevelopment: 'In development',
+      inDevelopmentHeading: 'This project is still in development',
     },
     contact: {
       heading: 'Get in Touch',
@@ -104,6 +105,7 @@ export const t = {
       walkthrough: 'Recorrido en capturas',
       zoom: 'Ampliar',
       inDevelopment: 'En desarrollo',
+      inDevelopmentHeading: 'Este proyecto aún está en desarrollo',
     },
     contact: {
       heading: 'Contáctame',

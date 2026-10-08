@@ -65,6 +65,11 @@ export const projects: Project[] = [
   {
     id: 7,
     title: 'Form Agent',
+    stage: 'in-development',
+    pending: {
+      en: 'The full flow works end to end, but it only runs locally (Docker Compose or the Windows .exe): there is no hosted deployment yet, and the interface is a functional wizard that has not had a visual design pass.',
+      es: 'El flujo completo funciona de punta a punta, pero solo corre en local (Docker Compose o el .exe de Windows): aún no hay un despliegue público, y la interfaz es un asistente funcional que todavía no tiene un trabajo de diseño visual.',
+    },
     shortDescription: {
       en: 'Containerized RPA that reads any web form, maps it to a CSV, Excel or SQL source, and submits every row.',
       es: 'RPA en contenedores que lee cualquier formulario web, lo mapea contra un CSV, Excel o base SQL y envía cada fila.',
@@ -90,6 +95,11 @@ export const projects: Project[] = [
   {
     id: 8,
     title: 'SaaS Suite',
+    stage: 'in-development',
+    pending: {
+      en: 'The backend, data isolation, billing and tests are done (v0.1.0), but the interface is still unstyled and none of the eleven products has a public deployment yet.',
+      es: 'El backend, el aislamiento de datos, la facturación y los tests están terminados (v0.1.0), pero la interfaz todavía no tiene diseño visual y ninguno de los once productos está desplegado públicamente.',
+    },
     shortDescription: {
       en: 'Eleven independent multi-tenant SaaS products on one blueprint: PostgreSQL row-level security, billing, bilingual UI.',
       es: 'Once productos SaaS multi-inquilino independientes sobre un mismo blueprint: seguridad a nivel de fila en PostgreSQL, facturación e interfaz bilingüe.',
@@ -194,6 +204,10 @@ export const projects: Project[] = [
     id: 9,
     title: 'Agencia Web IA',
     stage: 'in-development',
+    pending: {
+      en: 'Phases 1–4 of 7 work (lead generation, CRM base, site generation, deploy). Still pending: the shared backend for forms, bookings and WhatsApp, the analytics dashboard, and automated outreach.',
+      es: 'Funcionan las fases 1 a 4 de 7 (generación de leads, base CRM, generación de sitios y deploy). Faltan el backend compartido para formularios, citas y WhatsApp, el panel de analítica y el contacto automatizado.',
+    },
     shortDescription: {
       en: 'Pipeline that finds local businesses, generates a website for each with AI, QA-checks it and publishes it.',
       es: 'Pipeline que encuentra negocios locales, les genera un sitio web con IA, lo valida con QA automático y lo publica.',

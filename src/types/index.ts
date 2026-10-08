@@ -30,6 +30,8 @@ export type ProjectStage = 'in-development';
 export type Project = {
   id: number;
   stage?: ProjectStage;
+  /** What is still missing; shown as a callout when `stage` is set. */
+  pending?: Localized;
   /** Brand name — intentionally not localized. */
   title: string;
   shortDescription: Localized;

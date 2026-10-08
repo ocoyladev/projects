@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ExternalLink, Github, ChevronLeft, ChevronRight, ArrowUpRight, Lock, Images, ZoomIn } from 'lucide-react';
+import { X, ExternalLink, Github, ChevronLeft, ChevronRight, ArrowUpRight, Lock, Images, ZoomIn, Construction } from 'lucide-react';
 import { Project } from '../types';
 import { useLang } from '../lib/i18n';
 
@@ -323,6 +323,23 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
                     </p>
                     {stageLabel && <StageBadge label={stageLabel} />}
                   </div>
+
+                  {stageLabel && project.pending && (
+                    <div
+                      role="note"
+                      className="mb-6 flex gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30"
+                    >
+                      <Construction size={14} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                      <div>
+                        <h3 className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-1">
+                          {tr.projects.inDevelopmentHeading}
+                        </h3>
+                        <p className="text-xs text-amber-900/80 dark:text-amber-200/80 leading-relaxed">
+                          {loc(project.pending)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
                     {loc(project.description)}
