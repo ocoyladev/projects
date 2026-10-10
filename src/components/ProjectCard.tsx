@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ExternalLink, Github, ChevronLeft, ChevronRight, ArrowUpRight, Lock, Images, ZoomIn, Construction } from 'lucide-react';
+import { X, ExternalLink, Github, ChevronLeft, ChevronRight, ArrowUpRight, Lock, Images, ZoomIn, Construction, Play } from 'lucide-react';
 import { Project } from '../types';
 import { useLang } from '../lib/i18n';
 
@@ -56,11 +56,15 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
   const [isOpen, setIsOpen] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // The gallery opens on the video when there is one; picking a screenshot leaves it.
+  const [showVideo, setShowVideo] = useState(false);
   const { tr, loc } = useLang();
   const dialogRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
 
   const hasImages = project.images.length > 0;
+  const { video } = project;
+  const onVideo = showVideo && video !== undefined;
   const stageLabel = project.stage === 'in-development' ? tr.projects.inDevelopment : null;
   const padded = String(index).padStart(2, '0');
   const titleId = `project-${project.id}-title`;
@@ -81,6 +85,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
   const open = () => {
     openerRef.current = document.activeElement as HTMLElement | null;
     setCurrentImageIndex(0);
+    setShowVideo(video !== undefined);
     setIsOpen(true);
   };
 
@@ -101,7 +106,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
         else close();
         return;
       }
-      if (hasImages && project.images.length > 1) {
+      // Arrows stay with the video player while it is showing (seek, volume).
+      if (hasImages && project.images.length > 1 && !onVideo) {
         if (e.key === 'ArrowRight') nextImage();
         if (e.key === 'ArrowLeft') prevImage();
       }
@@ -128,7 +134,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
       document.body.style.overflow = overflow;
       openerRef.current?.focus();
     };
-  }, [isOpen, isZoomed, hasImages, project.images.length, close, nextImage, prevImage]);
+  }, [isOpen, isZoomed, hasImages, onVideo, project.images.length, close, nextImage, prevImage]);
 
   return (
     <>
@@ -168,6 +174,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
             <ImagePlaceholder title={project.title} index={project.id} />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          {video && (
+            <span className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm text-[10px] sm:text-xs font-mono text-white/90">
+              <Play size={11} className="fill-current" />
+              {tr.projects.videoDemo}
+            </span>
+          )}
           {/* Headline outcome, so the card says something before it is opened */}
           <span className="absolute bottom-2 left-2 right-2 px-2 py-1 rounded-md bg-black/55 backdrop-blur-sm text-[10px] sm:text-xs font-mono text-white/90 truncate">
             {loc(project.metric)}
@@ -221,9 +233,26 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
               <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
                 {/* Gallery — wider than the text pane, since the screenshots
                     are landscape and shrinking them makes them unreadable */}
-                <div className="md:w-3/5 flex-shrink-0 bg-slate-100 dark:bg-black/30 relative">
-                  <div className="relative h-56 md:h-full min-h-[200px]">
-                    {hasImages ? (
+                <div className="md:w-3/5 flex-shrink-0 bg-slate-100 dark:bg-black/30 relative flex flex-col">
+                  {/* flex-1 + min-h-0 so the thumbnail strip keeps its row: a
+                      <video> otherwise claims the full height and pushes it out */}
+                  <div className="relative h-56 md:h-auto md:flex-1 md:min-h-0 min-h-[200px]">
+                    {onVideo ? (
+                      // Muted autoplay is the only autoplay browsers allow; the
+                      // subtitles are burned in, and the controls unmute it.
+                      <video
+                        key={loc(video.src)}
+                        src={loc(video.src)}
+                        poster={loc(video.poster)}
+                        aria-label={`${project.title} — ${tr.projects.videoDemo}`}
+                        controls
+                        autoPlay
+                        muted
+                        playsInline
+                        preload="metadata"
+                        className="w-full h-full object-contain bg-black"
+                      />
+                    ) : hasImages ? (
                       <>
                         {/* contain, not cover: these are UI screenshots and
                             cropping them defeats the point of showing them */}
@@ -273,17 +302,36 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0 }) 
                       <ImagePlaceholder title={project.title} index={project.id} />
                     )}
                   </div>
-                  {hasImages && project.images.length > 1 && (
+                  {hasImages && (project.images.length > 1 || video) && (
                     <div className="flex gap-1.5 p-3 overflow-x-auto bg-black/10 dark:bg-black/20">
+                      {video && (
+                        <button
+                          type="button"
+                          onClick={() => setShowVideo(true)}
+                          aria-label={tr.projects.videoDemo}
+                          aria-current={onVideo}
+                          className={`relative flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden transition-all ${
+                            onVideo ? 'ring-2 ring-blue-500 opacity-100' : 'opacity-50 hover:opacity-75'
+                          }`}
+                        >
+                          <img src={loc(video.poster)} alt="" loading="lazy" className="w-full h-full object-cover" />
+                          <span className="absolute inset-0 grid place-items-center bg-black/40 text-white">
+                            <Play size={16} className="fill-current" />
+                          </span>
+                        </button>
+                      )}
                       {project.images.map((img, i) => (
                         <button
                           type="button"
                           key={img}
-                          onClick={() => setCurrentImageIndex(i)}
+                          onClick={() => {
+                            setShowVideo(false);
+                            setCurrentImageIndex(i);
+                          }}
                           aria-label={`${tr.projects.screenshot} ${i + 1}`}
-                          aria-current={i === currentImageIndex}
+                          aria-current={!onVideo && i === currentImageIndex}
                           className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden transition-all ${
-                            i === currentImageIndex
+                            !onVideo && i === currentImageIndex
                               ? 'ring-2 ring-blue-500 opacity-100'
                               : 'opacity-50 hover:opacity-75'
                           }`}

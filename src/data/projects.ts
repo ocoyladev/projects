@@ -27,6 +27,16 @@ export const projects: Project[] = [
       '/src/img/devolplus/07-configuracion.webp',
       '/src/img/devolplus/08-acceso.webp',
     ],
+    video: {
+      src: {
+        en: '/src/video/devolplus/devolplus-en.mp4',
+        es: '/src/video/devolplus/devolplus-es.mp4',
+      },
+      poster: {
+        en: '/src/video/devolplus/poster-en.jpg',
+        es: '/src/video/devolplus/poster-es.jpg',
+      },
+    },
     demo: {
       kind: 'private',
       note: {

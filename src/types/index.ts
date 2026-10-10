@@ -27,6 +27,12 @@ export type Demo =
  */
 export type ProjectStage = 'in-development';
 
+/** Narrated walkthrough; one file per language since narration and subtitles differ. */
+export type ProjectVideo = {
+  src: Localized;
+  poster: Localized;
+};
+
 export type Project = {
   id: number;
   stage?: ProjectStage;
@@ -41,6 +47,8 @@ export type Project = {
   /** Product and library names — intentionally not localized. */
   technologies: string[];
   images: string[];
+  /** Shown first in the gallery when present. */
+  video?: ProjectVideo;
   demo: Demo;
   liveUrl?: string;
   githubUrl?: string;
