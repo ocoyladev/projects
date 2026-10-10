@@ -58,3 +58,17 @@ or the metrics on the card change.
 ```bash
 node tools/gen-og-cover.mjs
 ```
+
+## `record-devolplus.mjs` — footage for the DEVOL+ demo video
+
+Drives the same real-frontend + mock-backend setup as the screenshots and
+records four scenes (case table, bulk selection + pre-flight, RPA run, per-case
+outcome) into `videos/devolplus/assets/footage/`. Needs `ffmpeg` on `PATH`.
+
+```bash
+node tools/devolplus-mock-server.mjs                 # 1. mock backend
+cd ../script_sunat/frontend && npm run dev           # 2. real frontend (5173)
+node tools/record-devolplus.mjs                      # 3. record
+```
+
+The video itself is a HyperFrames composition — see `videos/README.md`.

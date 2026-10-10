@@ -1,0 +1,76 @@
+{
+  "voices": {
+    "es": {
+      "voice": "ef_dora",
+      "lang": "es-419",
+      "speed": 1.12
+    },
+    "en": {
+      "voice": "af_heart",
+      "lang": "en-us",
+      "speed": 1.05
+    }
+  },
+  "segments": [
+    {
+      "id": "intro",
+      "es": "DEVOL más. Automatización para el equipo de Devoluciones de SUNAT, creada por iniciativa propia.",
+      "en": "DEVOL plus. Automation for SUNAT's tax refund team, built on my own initiative."
+    },
+    {
+      "id": "stat",
+      "es": "Evaluar un caso tomaba ochenta y cinco minutos. Hoy toma siete minutos y medio.",
+      "en": "Reviewing a case used to take eighty-five minutes. Now it takes seven and a half."
+    },
+    {
+      "id": "load",
+      "es": "Todo empieza con la carga de datos: lee el reporte del sistema o consulta la base de datos, y detecta los casos nuevos.",
+      "en": "It all starts with data loading: it reads the system report or queries the database, and detects the new cases."
+    },
+    {
+      "id": "table",
+      "es": "Esos casos llenan una sola tabla, con semáforo de vencimientos y filtros por columna.",
+      "en": "Those cases fill a single table, with due-date alerts and per-column filters."
+    },
+    {
+      "id": "folders",
+      "es": "Para cada caso crea su carpeta y descarga la información: el planeamiento, los reportes de rentas y el expediente electrónico, sin abrir un navegador.",
+      "en": "For each case it creates a folder and downloads the information: the audit plan, the income reports and the electronic case file, without opening a browser."
+    },
+    {
+      "id": "pdf",
+      "es": "Dentro de cada carpeta, lee las boletas de pago en PDF. Si están escaneadas, reconoce el texto, y extrae el ruc, la renta y la retención de cada una.",
+      "en": "Inside each folder, it reads the payslip PDFs. Scanned ones go through OCR, and it extracts each employer ID, income and withholding."
+    },
+    {
+      "id": "excel",
+      "es": "Con esos datos arma el Excel de trabajo: una hoja de abonos por cuenta bancaria, y el detalle de rentas, conciliado con fórmulas que el evaluador puede corregir.",
+      "en": "From that data it builds the working Excel file: one deposits sheet per bank account, and an income detail reconciled with formulas the reviewer can correct."
+    },
+    {
+      "id": "select",
+      "es": "Luego seleccionas los casos en bloque. Antes de actuar, revisa qué archivos ya existen y omite los que no cumplen requisitos.",
+      "en": "Then you select cases in bulk. Before acting, it checks which files already exist and skips the ones that don't qualify."
+    },
+    {
+      "id": "rpa",
+      "es": "El robot opera una aplicación de escritorio que no tiene A P I, y reporta su avance en vivo.",
+      "en": "The robot drives a desktop app that has no API, and reports its progress live."
+    },
+    {
+      "id": "outcome",
+      "es": "Si un caso falla, el error queda aislado y el lote continúa.",
+      "en": "If one case fails, the error stays isolated and the batch keeps going."
+    },
+    {
+      "id": "docs",
+      "es": "Al final genera las cartas en Word desde plantillas, y arma el expediente en PDF, foliado y firmado.",
+      "en": "Finally, it generates letters in Word from templates, and assembles the case file as a PDF, page-numbered and signed."
+    },
+    {
+      "id": "outro",
+      "es": "De ochenta y cinco a siete minutos y medio por caso, para unos cien usuarios en cinco unidades.",
+      "en": "From eighty-five to seven and a half minutes per case, for about a hundred users in five units."
+    }
+  ]
+}

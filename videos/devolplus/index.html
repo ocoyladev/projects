@@ -1,0 +1,955 @@
+<!doctype html>
+<html
+  lang="es"
+  data-composition-variables='[{"id":"lang","type":"string","label":"Language (es | en)","default":"es"}]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: Inter; font-weight: 400; src: url(assets/fonts/inter-latin-400-normal.woff2) format('woff2'); }
+      @font-face { font-family: Inter; font-weight: 600; src: url(assets/fonts/inter-latin-600-normal.woff2) format('woff2'); }
+      @font-face { font-family: Inter; font-weight: 800; src: url(assets/fonts/inter-latin-800-normal.woff2) format('woff2'); }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url(assets/fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2'); }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 600; src: url(assets/fonts/jetbrains-mono-latin-600-normal.woff2) format('woff2'); }
+
+      /* Same palette as ocoyladev.vercel.app (dark theme). */
+      :root {
+        --bg: #07070f;
+        --ink: #f1f5f9;
+        --muted: #94a3b8;
+        --line: rgba(255, 255, 255, 0.1);
+        --blue: #60a5fa;
+        --indigo: #818cf8;
+        --violet: #a78bfa;
+        --emerald: #34d399;
+        --amber: #fbbf24;
+        --grad: linear-gradient(135deg, var(--blue) 0%, var(--indigo) 50%, var(--violet) 100%);
+        /* Office-like chrome for the document scenes. */
+        --pdf-chrome: #323639;
+        --xl-green: #217346;
+        --word-blue: #2b579a;
+        --paper-ink: #1e293b;
+        --paper-line: #e2e8f0;
+        --stamp: #1d4ed8;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+      #root {
+        position: relative; width: 100%; height: 100%; overflow: hidden;
+        font-family: Inter, 'DejaVu Sans', sans-serif; color: var(--ink);
+        background:
+          radial-gradient(1200px 700px at 78% 12%, rgba(129, 140, 248, 0.16), transparent 60%),
+          radial-gradient(900px 600px at 10% 95%, rgba(96, 165, 250, 0.12), transparent 60%),
+          var(--bg);
+      }
+      #grid {
+        position: absolute; inset: 0; opacity: 0.35;
+        background-image: radial-gradient(rgba(148, 163, 184, 0.35) 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+      .scene { position: absolute; inset: 0; opacity: 0; }
+      .mono { font-family: 'JetBrains Mono', 'DejaVu Sans Mono', monospace; }
+      .tag { font-size: 26px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+      .tag b { color: var(--blue); font-weight: 600; }
+      .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+      /* 1 · intro */
+      #intro { display: flex; flex-direction: column; justify-content: center; padding: 0 180px 80px; }
+      #intro h1 { font-size: 230px; font-weight: 800; letter-spacing: -0.045em; line-height: 1; margin: 28px 0 36px; }
+      #intro .sub { font-size: 50px; font-weight: 600; max-width: 1350px; line-height: 1.2; }
+      #intro .by { margin-top: 34px; font-size: 28px; color: var(--muted); }
+
+      /* 2 · headline metric */
+      #stat { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding-bottom: 80px; }
+      #stat .label { font-size: 40px; color: var(--muted); font-weight: 600; }
+      #stat .row { display: flex; align-items: baseline; gap: 56px; margin: 30px 0 16px; }
+      #stat .before { font-size: 150px; font-weight: 800; color: #64748b; position: relative; }
+      #stat .before::after {
+        content: ''; position: absolute; left: -10px; right: -10px; top: 55%; height: 10px;
+        background: #f87171; border-radius: 6px; transform: scaleX(var(--strike, 0)); transform-origin: left;
+      }
+      #stat .arrow { font-size: 110px; color: var(--muted); }
+      #stat .after { font-size: 220px; font-weight: 800; letter-spacing: -0.04em; }
+      #stat .unit { font-size: 60px; color: var(--muted); font-weight: 600; margin-left: 12px; }
+      #stat .badge {
+        display: inline-block; padding: 18px 40px; border-radius: 22px; font-size: 64px; font-weight: 600;
+        color: var(--emerald); background: rgba(52, 211, 153, 0.12); border: 2px solid rgba(52, 211, 153, 0.35);
+      }
+      #stat .note { margin-top: 30px; font-size: 32px; color: var(--muted); }
+
+      /* app footage in a window */
+      .window {
+        position: absolute; left: 160px; top: 54px; width: 1600px; height: 900px;
+        border-radius: 22px; overflow: hidden; background: #fff;
+        box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--line);
+        transform-origin: 50% 40%;
+      }
+      .window .bar {
+        position: absolute; left: 0; right: 0; top: 0; height: 44px; background: #e2e8f0;
+        display: flex; align-items: center; gap: 10px; padding: 0 18px; z-index: 2;
+      }
+      .window .bar i { width: 14px; height: 14px; border-radius: 50%; display: block; }
+      .window .bar span { margin-left: 14px; font-size: 18px; color: #475569; }
+      .window video { position: absolute; left: 0; top: 44px; width: 1600px; height: 856px; object-fit: cover; object-position: top; }
+
+      /* Step caption: number + heading + the subtitle of what is being said. */
+      .caption {
+        position: absolute; left: 160px; right: 160px; bottom: 34px; height: 112px; z-index: 5;
+        display: flex; align-items: center; gap: 28px; padding: 0 34px; border-radius: 20px;
+        background: rgba(7, 7, 15, 0.86); border: 1px solid var(--line); backdrop-filter: blur(8px);
+      }
+      .caption .n { font-size: 30px; font-weight: 600; padding: 10px 16px; border-radius: 12px; background: rgba(96, 165, 250, 0.14); color: var(--blue); }
+      .caption h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; }
+      .caption .subs { position: relative; flex: 1; height: 100%; border-left: 1px solid var(--line); padding-left: 28px; }
+      .sub-line {
+        position: absolute; left: 28px; right: 0; top: 50%; transform: translateY(-50%);
+        font-size: 27px; line-height: 1.3; color: #e2e8f0; opacity: 0;
+      }
+      /* Free-standing subtitles for scenes without a caption bar. */
+      #subs { position: absolute; left: 260px; right: 260px; bottom: 46px; height: 96px; z-index: 6; }
+      #subs .sub-line {
+        left: 0; text-align: center; font-size: 32px; color: var(--ink);
+        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+      }
+
+      /* Document windows (PDF / Excel / Word). */
+      .doc {
+        position: absolute; border-radius: 16px; overflow: hidden; background: #fff; color: var(--paper-ink);
+        box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--line);
+      }
+      .doc .title {
+        height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 20px;
+        font-size: 19px; color: #fff; font-weight: 600;
+      }
+      .doc .title .ico { width: 28px; height: 28px; border-radius: 6px; display: grid; place-items: center; font-size: 14px; font-weight: 800; background: rgba(255, 255, 255, 0.92); }
+      .doc .title .meta { margin-left: auto; font-weight: 400; opacity: 0.8; }
+
+
+      /* 3 · data load */
+      #sources { position: absolute; left: 160px; top: 230px; width: 560px; }
+      .src { display: flex; align-items: center; gap: 24px; padding: 30px 30px; border-radius: 20px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.03); }
+      .src b { display: block; font-size: 30px; }
+      .src small { display: block; margin-top: 6px; font-size: 18px; color: var(--muted); }
+      .or { text-align: center; padding: 18px 0; font-size: 22px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+      .fi { flex: none; width: 54px; height: 62px; border-radius: 8px; display: grid; place-items: center; font-size: 15px; font-weight: 800; color: #fff; font-family: 'JetBrains Mono', monospace; }
+      .fi.xls { background: #217346; } .fi.pdf { background: #b91c1c; } .fi.db { background: #4f46e5; border-radius: 50% / 22%; }
+      .fo { flex: none; width: 34px; height: 26px; border-radius: 4px; background: #f4b400; position: relative; }
+      .fo::before { content: ''; position: absolute; left: 0; top: -5px; width: 14px; height: 7px; border-radius: 3px 3px 0 0; background: #f4b400; }
+      #flow { position: absolute; left: 740px; top: 470px; width: 140px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+      #flow i { position: absolute; left: 0; top: 0; width: 50px; height: 100%; background: var(--grad); }
+      #loader { position: absolute; left: 900px; top: 130px; width: 860px; padding: 34px 40px; border-radius: 22px; background: #0d1117; border: 1px solid var(--line); box-shadow: 0 40px 120px rgba(0, 0, 0, 0.5); }
+      #loader .head { font-size: 20px; color: var(--muted); display: flex; align-items: center; gap: 12px; }
+      #loader .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--emerald); }
+      #loader .log { margin-top: 22px; font-size: 22px; line-height: 1.75; color: #cbd5e1; }
+      #loader .log .ok { color: var(--emerald); }
+      #loader .found { margin-top: 22px; display: flex; align-items: baseline; gap: 18px; font-size: 34px; font-weight: 600; }
+      #ncases { font-size: 110px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+      #loader .cases { margin-top: 18px; font-size: 19px; }
+      #loader .cases div { display: grid; grid-template-columns: 130px 190px 1fr auto; gap: 14px; padding: 10px 0; border-top: 1px solid var(--line); color: #e2e8f0; }
+      #loader .cases em { font-style: normal; color: var(--blue); font-size: 16px; padding: 2px 10px; border-radius: 8px; background: rgba(96, 165, 250, 0.14); }
+
+      /* 5 · folders + downloads */
+      #explorer { left: 160px; top: 40px; width: 1600px; height: 880px; background: #f8fafc; }
+      #explorer .title { background: #1e293b; }
+      #explorer .title .ico { color: #1e293b; }
+      #explorer .panes { position: absolute; left: 0; right: 0; top: 48px; bottom: 0; display: grid; grid-template-columns: 250px 700px 1fr; }
+      #explorer .tree { padding: 24px 22px; font-size: 19px; line-height: 2.1; color: #475569; border-right: 1px solid #e2e8f0; }
+      #explorer .tree .on { color: #0f172a; font-weight: 600; } #explorer .tree .in { padding-left: 22px; }
+      #explorer .list { border-right: 1px solid #e2e8f0; }
+      #explorer .lh { display: flex; justify-content: space-between; padding: 16px 26px; font-size: 16px; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+      .fr { display: flex; align-items: center; gap: 16px; padding: 0 26px; height: 64px; font-size: 18px; color: #0f172a; border-bottom: 1px solid #f1f5f9; }
+      .fr .nm { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .fr .it { color: #64748b; }
+      #explorer .content { position: relative; padding: 0 30px; }
+      #explorer .ch { padding: 16px 0; font-size: 16px; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+      .dl { display: flex; align-items: center; gap: 18px; height: 88px; border-bottom: 1px solid #f1f5f9; color: #0f172a; }
+      .dl .fi { width: 42px; height: 50px; font-size: 12px; }
+      .dl .nf { flex: 1; min-width: 0; }
+      .dl .nf span { display: block; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .dl .nf b { display: block; margin-top: 10px; height: 6px; border-radius: 3px; background: #e2e8f0; overflow: hidden; }
+      .dl .nf b i { display: block; height: 100%; width: 100%; background: #22c55e; transform: scaleX(0); transform-origin: left; }
+      .dl em { flex: none; font-style: normal; font-size: 15px; font-weight: 600; color: #3730a3; background: #e0e7ff; padding: 6px 12px; border-radius: 10px; }
+      #nobrowser { position: absolute; left: 30px; right: 30px; bottom: 30px; padding: 16px; text-align: center; font-size: 20px; font-weight: 700; color: #065f46; background: #d1fae5; border: 2px solid #34d399; border-radius: 14px; opacity: 0; }
+
+      /* 6 · PDF payslips → extracted data */
+      #pdfwin { left: 130px; top: 50px; width: 900px; height: 860px; background: #525659; }
+      #pdfwin .title { background: var(--pdf-chrome); }
+      #pdfwin .title .ico { color: #b91c1c; }
+      .page {
+        position: absolute; background: #fff; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+        font-size: 17px; line-height: 1.45; overflow: hidden;
+      }
+      #boleta { left: 130px; top: 82px; width: 640px; height: 760px; padding: 40px 44px; }
+      #boleta .co { font-size: 24px; font-weight: 800; }
+      #boleta .ruc { color: #475569; }
+      #boleta h3 { margin: 18px 0 6px; font-size: 21px; letter-spacing: 0.04em; border-bottom: 2px solid var(--paper-ink); padding-bottom: 6px; }
+      #boleta .who { color: #475569; margin-bottom: 16px; }
+      #boleta table { width: 100%; border-collapse: collapse; }
+      #boleta th { text-align: left; font-size: 14px; letter-spacing: 0.06em; color: #526075; padding: 12px 0 4px; }
+      #boleta td { padding: 5px 0; border-bottom: 1px solid var(--paper-line); }
+      #boleta td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+      #boleta tr.tot td { font-weight: 800; border-bottom: 2px solid var(--paper-ink); }
+      #boleta .net { margin-top: 20px; display: flex; justify-content: space-between; font-size: 22px; font-weight: 800; padding: 12px 16px; background: #f1f5f9; border-radius: 8px; }
+      .hl { border-radius: 4px; box-shadow: 0 0 0 0 transparent; }
+      #scan {
+        position: absolute; left: 0; right: 0; top: 0; height: 90px; opacity: 0;
+        background: linear-gradient(180deg, transparent, rgba(96, 165, 250, 0.28) 70%, rgba(96, 165, 250, 0.9) 100%);
+      }
+      #ocr {
+        position: absolute; right: 24px; top: 66px; padding: 6px 14px; border-radius: 10px; font-size: 18px; font-weight: 600;
+        background: rgba(96, 165, 250, 0.95); color: #0b1220; opacity: 0;
+      }
+      #extract { position: absolute; left: 1110px; top: 120px; width: 680px; }
+      #extract .rows { margin-top: 26px; border-radius: 20px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.03); }
+      #extract .r { display: flex; align-items: center; gap: 18px; padding: 22px 28px; border-bottom: 1px solid var(--line); font-size: 26px; }
+      #extract .r:last-child { border-bottom: 0; }
+      #extract .k { width: 230px; color: var(--muted); font-size: 22px; }
+      #extract .v { flex: 1; font-weight: 600; opacity: 0; }
+      #extract .ok { color: var(--emerald); font-size: 28px; opacity: 0; }
+      #extract .prog { margin-top: 30px; display: flex; align-items: center; gap: 22px; font-size: 24px; color: var(--muted); }
+      #extract .track { flex: 1; height: 12px; border-radius: 6px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+      #extract .fill { height: 100%; width: 100%; background: var(--grad); transform: scaleX(0); transform-origin: left; }
+      #extract .count { color: var(--ink); font-weight: 600; min-width: 70px; text-align: right; }
+
+      /* 5 · Excel workbook */
+      #xlwin { left: 160px; top: 40px; width: 1600px; height: 880px; }
+      #xlwin .title { background: var(--xl-green); }
+      #xlwin .title .ico { color: var(--xl-green); }
+      #xlwin .ribbon { height: 50px; background: #f3f4f6; border-bottom: 1px solid #d1d5db; display: flex; align-items: center; gap: 30px; padding: 0 24px; font-size: 17px; color: #374151; }
+      #xlwin .ribbon b { color: var(--xl-green); border-bottom: 3px solid var(--xl-green); padding-bottom: 4px; }
+      #xlwin .fbar { height: 44px; display: flex; align-items: center; border-bottom: 1px solid #d1d5db; font-size: 18px; }
+      #xlwin .namebox { width: 110px; height: 100%; display: grid; place-items: center; border-right: 1px solid #d1d5db; }
+      #xlwin .fx { width: 60px; text-align: center; color: #6b7280; font-style: italic; border-right: 1px solid #d1d5db; }
+      #xlwin .formula { position: relative; flex: 1; height: 100%; }
+      #xlwin .formula span { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); opacity: 0; }
+      .sheet { position: absolute; left: 0; right: 0; top: 142px; bottom: 44px; opacity: 0; background: #fff;
+        background-image: linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, #e5e7eb 1px, transparent 1px);
+        background-size: 100% 44px, 100% 100%; background-position: 0 33px; }
+      .sheet table { border-collapse: collapse; table-layout: fixed; font-size: 20px; background: #fff; }
+      .sheet th { height: 34px; background: #f3f4f6; color: #4b5563; font-weight: 400; font-size: 16px; border: 1px solid #d1d5db; }
+      .sheet td { height: 44px; padding: 0 12px; border: 1px solid #e5e7eb; white-space: nowrap; overflow: hidden; }
+      .sheet td.rn { background: #f3f4f6; color: #4b5563; font-size: 16px; text-align: center; padding: 0; }
+      .sheet td.num { text-align: right; font-variant-numeric: tabular-nums; }
+      .sheet tr.ttl td.c { background: var(--xl-green); color: #fff; font-weight: 700; }
+      .sheet tr.hdr td.c { background: #dcfce7; color: #14532d; font-weight: 700; font-size: 17px; }
+      .sheet tr.tot td.c { font-weight: 800; border-top: 2px solid #111827; }
+      .sheet td.okc { color: #15803d; font-weight: 700; }
+      .sheet .cell { display: inline-block; }
+      .tabs { position: absolute; left: 0; right: 0; bottom: 0; height: 44px; background: #f3f4f6; border-top: 1px solid #d1d5db; display: flex; align-items: stretch; padding-left: 60px; font-size: 17px; }
+      .tabs div { position: relative; padding: 0 26px; display: grid; place-items: center; color: #4b5563; }
+      .tabs div i { position: absolute; inset: 0; background: #fff; border-bottom: 3px solid var(--xl-green); opacity: 0; }
+      .tabs div span { position: relative; }
+
+      /* 9 · Word letter + PDF case file */
+      #wordwin { left: 110px; top: 50px; width: 900px; height: 860px; background: #e5e7eb; }
+      #wordwin .title { background: var(--word-blue); }
+      #wordwin .title .ico { color: var(--word-blue); }
+      #wordwin .ribbon { height: 46px; background: #f3f4f6; border-bottom: 1px solid #d1d5db; display: flex; align-items: center; gap: 26px; padding: 0 22px; font-size: 16px; color: #374151; }
+      #wordwin .ribbon b { color: var(--word-blue); }
+      #letter {
+        left: 90px; top: 120px; width: 720px; height: 720px; padding: 54px 60px;
+        font-family: 'DejaVu Serif', Georgia, serif; font-size: 19px; line-height: 1.6;
+      }
+      #letter .no { font-weight: 700; font-size: 21px; }
+      #letter .date { text-align: right; color: #475569; margin: 4px 0 22px; }
+      #letter p { margin-bottom: 10px; }
+      .field { display: inline-grid; vertical-align: bottom; border-radius: 4px; padding: 0 4px; }
+      .field > span { grid-area: 1 / 1; }
+      .field .ph { color: #6b7280; background: #e5e7eb; border-radius: 4px; padding: 0 4px; font-family: 'JetBrains Mono', monospace; font-size: 16px; }
+      .field .ph { justify-self: start; }
+      .field .val { white-space: nowrap; font-weight: 700; opacity: 0; }
+      .gl { height: 12px; border-radius: 6px; background: var(--paper-line); margin: 14px 0; }
+      #pdfcase { left: 1070px; top: 50px; width: 740px; height: 860px; background: #525659; }
+      #pdfcase .title { background: var(--pdf-chrome); }
+      #pdfcase .title .ico { color: #b91c1c; }
+      #pages { position: absolute; left: 40px; top: 84px; display: grid; grid-template-columns: repeat(2, 310px); gap: 34px 40px; }
+      .pg { position: relative; width: 310px; height: 360px; background: #fff; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); padding: 34px 30px; }
+      .pg .gl { margin: 12px 0; height: 10px; }
+      .pg .cover { margin-top: 90px; text-align: center; font-weight: 800; font-size: 20px; line-height: 1.4; }
+      .pg .cover small { display: block; font-weight: 400; color: #64748b; font-size: 15px; }
+      .stamp {
+        position: absolute; right: 16px; top: 14px; width: 84px; height: 84px; border-radius: 50%;
+        border: 4px solid var(--stamp); color: var(--stamp); display: grid; place-items: center; text-align: center;
+        font-size: 12px; font-weight: 700; letter-spacing: 0.08em; line-height: 1.1; transform: rotate(-12deg); opacity: 0;
+      }
+      .stamp b { display: block; font-size: 28px; letter-spacing: 0; }
+      #sign { position: absolute; left: 34px; bottom: 30px; width: 230px; height: 80px; }
+      #sign path { fill: none; stroke: #0f172a; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+      #sign .ln { position: absolute; left: 0; right: 30px; bottom: 6px; height: 2px; background: #94a3b8; }
+      #signed {
+        position: absolute; left: 30px; right: 30px; bottom: 34px; text-align: center; padding: 10px 0; border-radius: 12px; font-size: 19px; font-weight: 700;
+        color: #065f46; background: #d1fae5; border: 2px solid #34d399; opacity: 0;
+      }
+
+      /* 10 · outro */
+      #outro { display: flex; flex-direction: column; justify-content: center; padding: 0 160px 90px; }
+      #outro .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin: 34px 0 44px; }
+      #outro .card { padding: 38px 34px; border-radius: 24px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); }
+      #outro .card .v { font-size: 92px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+      #outro .card .k { margin-top: 16px; font-size: 27px; color: var(--muted); line-height: 1.3; }
+      #outro .stack { font-size: 21px; color: var(--muted); }
+      #outro .stack b { color: var(--indigo); font-weight: 600; }
+      #outro .url { margin-top: 36px; font-size: 44px; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="95.2" data-width="1920" data-height="1080">
+      <div id="grid"></div>
+
+      <!-- Narration: one clip per scene. `npm run render:<lang>` copies that
+           language's WAVs (scripts/narrate.py) into assets/audio/current/. -->
+      <audio id="a-intro" src="assets/audio/current/intro.wav" data-start="0.4" data-duration="5.4"></audio>
+      <audio id="a-stat" src="assets/audio/current/stat.wav" data-start="6.0" data-duration="4.7"></audio>
+      <audio id="a-load" src="assets/audio/current/load.wav" data-start="11.6" data-duration="6.7"></audio>
+      <audio id="a-table" src="assets/audio/current/table.wav" data-start="19.1" data-duration="4.9"></audio>
+      <audio id="a-folders" src="assets/audio/current/folders.wav" data-start="25.2" data-duration="9.4"></audio>
+      <audio id="a-pdf" src="assets/audio/current/pdf.wav" data-start="35.3" data-duration="9.5"></audio>
+      <audio id="a-excel" src="assets/audio/current/excel.wav" data-start="45.3" data-duration="9.7"></audio>
+      <audio id="a-select" src="assets/audio/current/select.wav" data-start="55.9" data-duration="7.1"></audio>
+      <audio id="a-rpa" src="assets/audio/current/rpa.wav" data-start="64.8" data-duration="5.2"></audio>
+      <audio id="a-outcome" src="assets/audio/current/outcome.wav" data-start="73.2" data-duration="4.1"></audio>
+      <audio id="a-docs" src="assets/audio/current/docs.wav" data-start="78.5" data-duration="7.4"></audio>
+      <audio id="a-outro" src="assets/audio/current/outro.wav" data-start="88.3" data-duration="5.2"></audio>
+
+      <!-- 1 · intro -->
+      <section id="intro" class="scene clip" data-start="0" data-duration="6" data-track-index="0">
+        <div class="tag mono"><b>//</b> <span data-t="introTag"></span></div>
+        <h1 class="grad">DEVOL+</h1>
+        <div class="sub" data-t="introSub"></div>
+        <div class="by mono" data-t="introBy"></div>
+      </section>
+
+      <!-- 2 · headline metric -->
+      <section id="stat" class="scene clip" data-start="5.7" data-duration="5.8" data-track-index="0">
+        <div class="label" data-t="statLabel"></div>
+        <div class="row">
+          <div class="before">85<span class="unit">min</span></div>
+          <div class="arrow">›</div>
+          <div class="after"><span id="count" class="grad">85</span><span class="unit">min</span></div>
+        </div>
+        <div class="badge">−91 %</div>
+        <div class="note" data-t="statNote"></div>
+      </section>
+
+      <!-- 3 · data load: system report or database → new cases -->
+      <section id="load" class="scene clip" data-start="11.2" data-duration="7.8" data-track-index="0" data-sub="load">
+        <div id="sources">
+          <div class="src" id="src-xls"><span class="fi xls">XLS</span><div><b data-t="srcReport"></b><small class="mono">reporte_2026-10.xls</small></div></div>
+          <div class="or" data-t="or"></div>
+          <div class="src" id="src-db"><span class="fi db">DB</span><div><b data-t="srcDb"></b><small class="mono">SELECT … WHERE estado = 'PEND'</small></div></div>
+        </div>
+        <div id="flow"><i></i></div>
+        <div id="loader">
+          <div class="head mono"><span class="dot"></span>DEVOL+ · <span data-t="loadTitle"></span></div>
+          <div class="log mono">
+            <div data-t="log1"></div>
+            <div class="ok" data-t="log2"></div>
+            <div class="ok" data-t="log3"></div>
+            <div data-t="log4"></div>
+          </div>
+          <div class="found"><span id="ncases" class="grad">0</span><span data-t="newCases"></span></div>
+          <div class="cases mono">
+            <div><span>2601234</span><span>20601234567</span><span>EMPRESA DEMO SAC</span><em data-t="tagNew"></em></div>
+            <div><span>2601241</span><span>20512345678</span><span>COMERCIAL ANDINA SRL</span><em data-t="tagNew"></em></div>
+            <div><span>2601255</span><span>10456789012</span><span>PEREZ QUISPE JUAN</span><em data-t="tagNew"></em></div>
+          </div>
+        </div>
+        <div class="caption"><span class="n mono">01</span><h2 data-t="hLoad"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 4 · case table -->
+      <section id="s1" class="scene shot" data-sub="table">
+        <div class="window">
+          <div class="bar"><i style="background:#f87171"></i><i style="background:#fbbf24"></i><i style="background:#34d399"></i><span class="mono">DEVOL+ · WebView2</span></div>
+          <video id="v1" class="clip" src="assets/footage/01-tabla.mp4" data-start="18.7" data-duration="6.4" data-media-start="0.3" muted playsinline></video>
+        </div>
+        <div class="caption"><span class="n mono">02</span><h2 data-t="h1"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 5 · one folder per case, filled by the downloads -->
+      <section id="folders" class="scene clip" data-start="24.8" data-duration="10.4" data-track-index="0" data-sub="folders">
+        <div id="explorer" class="doc">
+          <div class="title"><span class="ico">▤</span><span class="mono">Descargas › DEVOL</span><span class="meta" data-t="explorer"></span></div>
+          <div class="panes">
+            <div class="tree">
+              <div>▸ <span data-t="treeHome"></span></div><div>▸ <span data-t="treeDocs"></span></div><div class="on">▾ Descargas</div><div class="in on">▾ DEVOL</div>
+            </div>
+            <div class="list">
+              <div class="lh"><span data-t="colName"></span><span data-t="colItems"></span></div>
+              <div class="fr" id="fr1"><span class="fo"></span><span class="nm mono">2601234_20601234567_EMPRESA DEMO SAC</span><span class="it mono" id="it1">0</span></div>
+              <div class="fr"><span class="fo"></span><span class="nm mono">2601241_20512345678_COMERCIAL ANDINA SRL</span><span class="it mono">6</span></div>
+              <div class="fr"><span class="fo"></span><span class="nm mono">2601255_10456789012_PEREZ QUISPE JUAN</span><span class="it mono">6</span></div>
+              <div class="fr"><span class="fo"></span><span class="nm mono">2601262_20498765432_TRANSPORTES DEL SUR SAC</span><span class="it mono">5</span></div>
+              <div class="fr"><span class="fo"></span><span class="nm mono">2601270_10765432109_QUISPE MAMANI ROSA</span><span class="it mono">6</span></div>
+              <div class="fr"><span class="fo"></span><span class="nm mono">2601288_20587654321_INVERSIONES PACIFICO SAC</span><span class="it mono">6</span></div>
+            </div>
+            <div class="content">
+              <div class="ch mono">2601234_20601234567_…</div>
+              <div class="dl" id="dl1"><span class="fi pdf">PDF</span><div class="nf"><span class="mono">Planeamiento.pdf</span><b><i></i></b></div><em data-t="srcAudit"></em></div>
+              <div class="dl" id="dl2"><span class="fi xls">XLS</span><div class="nf"><span class="mono">20601234567_2024_3UIT.xls</span><b><i></i></b></div><em>Intranet</em></div>
+              <div class="dl" id="dl3"><span class="fi xls">XLS</span><div class="nf"><span class="mono">RxH_2024.xlsx</span><b><i></i></b></div><em>Intranet</em></div>
+              <div class="dl" id="dl4"><span class="fi xls">XLS</span><div class="nf"><span class="mono">ITF_2024.xlsx</span><b><i></i></b></div><em>Intranet</em></div>
+              <div class="dl" id="dl5"><span class="fo"></span><div class="nf"><span class="mono">Expediente/</span><b><i></i></b></div><em data-t="srcEcase"></em></div>
+              <div class="dl" id="dl6"><span class="fi xls">XLS</span><div class="nf"><span class="mono">MACRO.xlsx</span><b><i></i></b></div><em data-t="srcDbTpl"></em></div>
+              <div id="nobrowser" data-t="noBrowser"></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption"><span class="n mono">03</span><h2 data-t="hFolders"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 6 · payslip PDFs → extracted fields -->
+      <section id="pdf" class="scene clip" data-start="34.9" data-duration="10.3" data-track-index="0" data-sub="pdf">
+        <div id="pdfwin" class="doc">
+          <div class="title"><span class="ico">PDF</span><span class="mono">boleta_2024-03.pdf</span><span class="meta mono">1 / 3</span></div>
+          <div id="boleta" class="page">
+            <div class="co">EMPRESA DEMO S.A.C.</div>
+            <div class="ruc">RUC <span class="hl" id="hl-ruc">20601234567</span></div>
+            <h3>BOLETA DE PAGO · <span class="hl" id="hl-per">MARZO 2024</span></h3>
+            <div class="who">Trabajador: PÉREZ QUISPE, JUAN · Código 000123</div>
+            <table>
+              <tr><th colspan="2">INGRESOS</th></tr>
+              <tr><td>Remuneración básica</td><td>4,500.00</td></tr>
+              <tr><td>Asignación familiar</td><td>102.50</td></tr>
+              <tr><td>Horas extra</td><td>350.00</td></tr>
+              <tr class="tot"><td>TOTAL INGRESOS</td><td><span class="hl" id="hl-renta">4,952.50</span></td></tr>
+              <tr><th colspan="2">DESCUENTOS</th></tr>
+              <tr><td>AFP · aporte obligatorio</td><td>495.25</td></tr>
+              <tr><td>Renta de 5.ª categoría</td><td><span class="hl" id="hl-ret">312.40</span></td></tr>
+              <tr class="tot"><td>TOTAL DESCUENTOS</td><td>807.65</td></tr>
+            </table>
+            <div class="net"><span>NETO A PAGAR</span><span>S/ 4,144.85</span></div>
+            <div id="scan"></div>
+          </div>
+          <div id="ocr" class="mono">OCR</div>
+        </div>
+        <div id="extract">
+          <div class="tag mono"><b>//</b> <span data-t="extractTag"></span></div>
+          <div class="rows">
+            <div class="r"><span class="k" data-t="fEmp"></span><span class="v" id="x-emp">EMPRESA DEMO S.A.C.</span><span class="ok" id="ok-emp">✓</span></div>
+            <div class="r"><span class="k">RUC</span><span class="v mono" id="x-ruc">20601234567</span><span class="ok" id="ok-ruc">✓</span></div>
+            <div class="r"><span class="k" data-t="fPer"></span><span class="v" id="x-per">03 / 2024</span><span class="ok" id="ok-per">✓</span></div>
+            <div class="r"><span class="k" data-t="fRenta"></span><span class="v mono" id="x-renta">S/ 4,952.50</span><span class="ok" id="ok-renta">✓</span></div>
+            <div class="r"><span class="k" data-t="fRet"></span><span class="v mono" id="x-ret">S/ 312.40</span><span class="ok" id="ok-ret">✓</span></div>
+          </div>
+          <div class="prog"><span data-t="payslips"></span><div class="track"><div class="fill"></div></div><span class="count mono" id="pcount">1 / 3</span></div>
+        </div>
+        <div class="caption"><span class="n mono">04</span><h2 data-t="h2"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 5 · Excel workbook: deposits sheet, then the income detail -->
+      <section id="excel" class="scene clip" data-start="44.9" data-duration="10.9" data-track-index="0" data-sub="excel">
+        <div id="xlwin" class="doc">
+          <div class="title"><span class="ico">X</span><span class="mono">MACRO.xlsx</span><span class="meta">Excel</span></div>
+          <div class="ribbon"><span>Archivo</span><b>Inicio</b><span>Insertar</span><span>Fórmulas</span><span>Datos</span><span>Revisar</span><span>Vista</span></div>
+          <div class="fbar">
+            <div class="namebox mono" id="namebox">A1</div><div class="fx">fx</div>
+            <div class="formula mono"><span id="f-sum">=SUMA(D4:D6)</span><span id="f-chk">=SI(C11=D11;"✓ Conciliado";"Revisar")</span></div>
+          </div>
+          <div class="sheet" id="sh-abono"></div>
+          <div class="sheet" id="sh-rentas"></div>
+          <div class="tabs">
+            <div id="tab-abono"><i></i><span>Abono_BCP</span></div>
+            <div><span>Abono_Interbank</span></div>
+            <div id="tab-rentas"><i></i><span>Rentas Detalle</span></div>
+          </div>
+        </div>
+        <div class="caption"><span class="n mono">05</span><h2 data-t="h3"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 6 · selection + preflight -->
+      <section id="s2" class="scene shot" data-sub="select">
+        <div class="window">
+          <div class="bar"><i style="background:#f87171"></i><i style="background:#fbbf24"></i><i style="background:#34d399"></i><span class="mono">DEVOL+ · WebView2</span></div>
+          <video id="v2" class="clip" src="assets/footage/02-seleccion.mp4" data-start="55.5" data-duration="9.2" data-media-start="0.9" muted playsinline></video>
+        </div>
+        <div class="caption"><span class="n mono">06</span><h2 data-t="h4"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 7 · RPA run streamed over WebSocket -->
+      <section id="s3" class="scene shot" data-sub="rpa">
+        <div class="window">
+          <div class="bar"><i style="background:#f87171"></i><i style="background:#fbbf24"></i><i style="background:#34d399"></i><span class="mono">DEVOL+ · WebView2</span></div>
+          <video id="v3" class="clip" src="assets/footage/03-ejecucion.mp4" data-start="64.4" data-duration="8.8" data-media-start="0.6" muted playsinline></video>
+        </div>
+        <div class="caption"><span class="n mono">07</span><h2 data-t="h5"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 8 · per-case outcome -->
+      <section id="s4" class="scene shot" data-sub="outcome">
+        <div class="window">
+          <div class="bar"><i style="background:#f87171"></i><i style="background:#fbbf24"></i><i style="background:#34d399"></i><span class="mono">DEVOL+ · WebView2</span></div>
+          <video id="v4" class="clip" src="assets/footage/04-resultado.mp4" data-start="72.9" data-duration="5.5" data-media-start="0.2" muted playsinline></video>
+        </div>
+        <div class="caption"><span class="n mono">08</span><h2 data-t="h6"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 9 · Word letter from a template + foliated, signed PDF case file -->
+      <section id="docs" class="scene clip" data-start="78.1" data-duration="10.1" data-track-index="0" data-sub="docs">
+        <div id="wordwin" class="doc">
+          <div class="title"><span class="ico">W</span><span class="mono">Carta_000123-2026.docx</span><span class="meta">Word</span></div>
+          <div class="ribbon"><span>Archivo</span><b>Correspondencia</b><span>Insertar campo</span><span>Vista previa</span><span>Finalizar y combinar</span></div>
+          <div id="letter" class="page">
+            <div class="no">CARTA N.° 000123-2026</div>
+            <div class="date">Lima, 10 de octubre de 2026</div>
+            <p>Señor(a): <span class="field" id="m1"><span class="ph">«CONTRIBUYENTE»</span><span class="val">PÉREZ QUISPE, JUAN</span></span></p>
+            <p>RUC: <span class="field" id="m2"><span class="ph">«RUC»</span><span class="val">10456789012</span></span></p>
+            <p>Asunto: solicitud de devolución <span class="field" id="m3"><span class="ph">«EXPEDIENTE»</span><span class="val">N.° 0001-2026</span></span></p>
+            <p style="margin-top:18px">Se le solicita presentar, en un plazo de cinco (05) días hábiles, la documentación que sustente el importe de <span class="field" id="m4"><span class="ph">«MONTO»</span><span class="val">S/ 3,748.80</span></span>.</p>
+            <div class="gl" style="width:96%"></div><div class="gl" style="width:88%"></div><div class="gl" style="width:93%"></div><div class="gl" style="width:60%"></div>
+          </div>
+        </div>
+        <div id="pdfcase" class="doc">
+          <div class="title"><span class="ico">PDF</span><span class="mono">Expediente_0001-2026.pdf</span><span class="meta mono">4 pp.</span></div>
+          <div id="pages">
+            <div class="pg"><div class="cover">EXPEDIENTE<br />N.° 0001-2026<small data-t="cover"></small></div><div id="signed" data-t="signed"></div></div>
+            <div class="pg"><div class="gl" style="width:70%"></div><div class="gl"></div><div class="gl" style="width:92%"></div><div class="gl" style="width:85%"></div><div class="gl" style="width:60%"></div><div class="stamp" id="st1"><span>FOLIO<b>03</b></span></div></div>
+            <div class="pg"><div class="gl" style="width:80%"></div><div class="gl"></div><div class="gl" style="width:90%"></div><div class="gl" style="width:74%"></div><div class="stamp" id="st2"><span>FOLIO<b>02</b></span></div></div>
+            <div class="pg"><div class="gl" style="width:66%"></div><div class="gl"></div><div class="gl" style="width:84%"></div><div class="stamp" id="st3"><span>FOLIO<b>01</b></span></div>
+              <div id="sign"><svg viewBox="0 0 230 80" width="230" height="80"><path id="sigpath" d="M8 52 C 24 18, 38 18, 40 46 S 58 70, 70 36 S 92 10, 96 44 C 98 60, 112 58, 120 40 C 128 24, 140 30, 142 46 C 144 58, 160 56, 176 38 L 214 30" /></svg><div class="ln"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption"><span class="n mono">09</span><h2 data-t="h7"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 10 · outro -->
+      <section id="outro" class="scene clip" data-start="87.9" data-duration="7.3" data-track-index="0">
+        <div class="tag mono"><b>//</b> <span data-t="outroTag"></span></div>
+        <div class="cards">
+          <div class="card"><div class="v grad">−91 %</div><div class="k" data-t="k1"></div></div>
+          <div class="card"><div class="v grad">~100</div><div class="k" data-t="k2"></div></div>
+          <div class="card"><div class="v grad">72 k</div><div class="k" data-t="k3"></div></div>
+          <div class="card"><div class="v grad">5</div><div class="k" data-t="k4"></div></div>
+        </div>
+        <div class="stack mono"><b>Python</b> · FastAPI · WebSocket · <b>React 18</b> · TypeScript · AG Grid · pywinauto · openpyxl · pdfplumber · <b>PyInstaller</b></div>
+        <div class="url mono grad">ocoyladev.vercel.app</div>
+      </section>
+
+      <!-- subtitles for the scenes without a caption bar (intro, metric, outro) -->
+      <div id="subs"></div>
+    </div>
+
+    <script>
+      // Copy lives here so one composition renders both languages:
+      //   npx hyperframes render --variables '{"lang":"en"}'
+      // SUBS mirrors narration/narration.json in display form ("|" splits a
+      // segment into the lines shown one after another).
+      const COPY = {
+        es: {
+          introTag: 'caso de estudio · automatización RPA',
+          introSub: 'Plataforma de automatización para el equipo de Devoluciones de SUNAT',
+          introBy: 'Único desarrollador · por iniciativa propia · desde marzo de 2025',
+          statLabel: 'Ciclo de trabajo por caso',
+          statNote: 'en más de 100 casos concurrentes · ~100 usuarios en 5 unidades',
+          hLoad: 'Carga de datos',
+          srcReport: 'Reporte del sistema',
+          srcDb: 'Base de datos',
+          or: 'o',
+          loadTitle: 'carga de datos',
+          log1: '— Fase 1 · lectura del reporte',
+          log2: '✓ 128 registros leídos',
+          log3: '✓ cruce con la base de datos',
+          log4: '— Fase 2 · detección de casos nuevos',
+          newCases: 'casos nuevos',
+          tagNew: 'NUEVO',
+          h1: 'Cientos de casos en una sola tabla',
+          hFolders: 'Carpetas y descargas',
+          explorer: 'Explorador de archivos',
+          treeHome: 'Inicio',
+          treeDocs: 'Documentos',
+          colName: 'Nombre',
+          colItems: 'Elementos',
+          srcAudit: 'Sist. de fiscalización',
+          srcEcase: 'Expediente electrónico',
+          srcDbTpl: 'BD + plantilla',
+          noBrowser: '✓ Descarga directa, sin abrir un navegador',
+          h2: 'Lee boletas en PDF',
+          h3: 'Arma el Excel de trabajo',
+          h4: 'Selección masiva',
+          h5: 'RPA sin API',
+          h6: 'Errores aislados',
+          h7: 'Cartas y expediente',
+          extractTag: 'datos extraídos',
+          fEmp: 'Empleador',
+          fPer: 'Periodo',
+          fRenta: 'Renta bruta',
+          fRet: 'Retención 5.ª cat.',
+          payslips: 'Boletas',
+          cover: 'Solicitud de devolución',
+          signed: '✓ Foliado y firmado',
+          outroTag: 'resultados',
+          k1: 'ciclo por caso, de 85 a 7,5 min',
+          k2: 'usuarios en 5 unidades operativas',
+          k3: 'líneas de Python · 20 flujos · 64 endpoints',
+          k4: 'sistemas integrados, ninguno con API moderna',
+        },
+        en: {
+          introTag: 'case study · RPA automation',
+          introSub: "Automation platform for SUNAT's tax-refund (Devolutions) team",
+          introBy: 'Sole developer · self-initiated · since March 2025',
+          statLabel: 'Work cycle per case',
+          statNote: 'across 100+ concurrent cases · ~100 users in 5 units',
+          hLoad: 'Data loading',
+          srcReport: 'System report',
+          srcDb: 'Database',
+          or: 'or',
+          loadTitle: 'data load',
+          log1: '— Phase 1 · reading the report',
+          log2: '✓ 128 records read',
+          log3: '✓ matched against the database',
+          log4: '— Phase 2 · detecting new cases',
+          newCases: 'new cases',
+          tagNew: 'NEW',
+          h1: 'Hundreds of cases, one table',
+          hFolders: 'Folders and downloads',
+          explorer: 'File Explorer',
+          treeHome: 'Home',
+          treeDocs: 'Documents',
+          colName: 'Name',
+          colItems: 'Items',
+          srcAudit: 'Audit system',
+          srcEcase: 'E-case file',
+          srcDbTpl: 'DB + template',
+          noBrowser: '✓ Direct download, no browser needed',
+          h2: 'Reads payslip PDFs',
+          h3: 'Builds the Excel workbook',
+          h4: 'Bulk selection',
+          h5: 'RPA with no API',
+          h6: 'Isolated failures',
+          h7: 'Letters and case file',
+          extractTag: 'extracted fields',
+          fEmp: 'Employer',
+          fPer: 'Period',
+          fRenta: 'Gross income',
+          fRet: 'Tax withheld',
+          payslips: 'Payslips',
+          cover: 'Refund request',
+          signed: '✓ Page-numbered and signed',
+          outroTag: 'outcomes',
+          k1: 'per-case cycle, from 85 to 7.5 min',
+          k2: 'users across 5 operational units',
+          k3: 'lines of Python · 20 flows · 64 endpoints',
+          k4: 'enterprise systems integrated, none with a modern API',
+        },
+      };
+      const SUBS = {
+        es: {
+          intro: 'DEVOL+: automatización para el equipo de Devoluciones de SUNAT,|creada por iniciativa propia.',
+          stat: 'Evaluar un caso tomaba 85 minutos.|Hoy toma 7,5 minutos.',
+          load: 'Todo empieza con la carga de datos:|lee el reporte del sistema o consulta la base de datos|y detecta los casos nuevos.',
+          table: 'Esos casos llenan una sola tabla,|con semáforo de vencimientos y filtros por columna.',
+          folders: 'Para cada caso crea su carpeta y descarga la información:|el planeamiento, los reportes de rentas y el expediente electrónico,|sin abrir un navegador.',
+          pdf: 'Dentro de cada carpeta, lee las boletas de pago en PDF.|Si están escaneadas, reconoce el texto|y extrae el RUC, la renta y la retención de cada una.',
+          excel: 'Con esos datos arma el Excel de trabajo:|una hoja de abonos por cuenta bancaria|y el detalle de rentas, conciliado con fórmulas que el evaluador puede corregir.',
+          select: 'Luego seleccionas los casos en bloque.|Antes de actuar, revisa qué archivos ya existen|y omite los que no cumplen requisitos.',
+          rpa: 'El robot opera una aplicación de escritorio que no tiene API|y reporta su avance en vivo.',
+          outcome: 'Si un caso falla, el error queda aislado y el lote continúa.',
+          docs: 'Al final genera las cartas en Word desde plantillas|y arma el expediente en PDF, foliado y firmado.',
+          outro: 'De 85 a 7,5 minutos por caso,|para unos 100 usuarios en 5 unidades.',
+        },
+        en: {
+          intro: "DEVOL+: automation for SUNAT's tax refund team,|built on my own initiative.",
+          stat: 'Reviewing a case used to take 85 minutes.|Now it takes 7.5.',
+          load: 'It all starts with data loading:|it reads the system report or queries the database|and detects the new cases.',
+          table: 'Those cases fill a single table,|with due-date alerts and per-column filters.',
+          folders: 'For each case it creates a folder and downloads the information:|the audit plan, the income reports and the electronic case file,|without opening a browser.',
+          pdf: 'Inside each folder, it reads the payslip PDFs.|Scanned ones go through OCR,|and it extracts each employer ID, income and withholding.',
+          excel: 'From that data it builds the working Excel file:|one deposits sheet per bank account,|and an income detail reconciled with formulas the reviewer can correct.',
+          select: 'Then you select cases in bulk.|Before acting, it checks which files already exist|and skips the ones that don\'t qualify.',
+          rpa: 'The robot drives a desktop app that has no API,|and reports its progress live.',
+          outcome: 'If one case fails, the error stays isolated and the batch keeps going.',
+          docs: 'Finally, it generates letters in Word from templates,|and assembles the case file as a PDF, page-numbered and signed.',
+          outro: 'From 85 to 7.5 minutes per case,|for about 100 users in 5 units.',
+        },
+      };
+      // Clip lengths printed by scripts/narrate.py; update after re-synthesizing.
+      const NARRATION_SECONDS = {
+        es: { intro: 5.25, stat: 4.57, load: 6.49, table: 4.76, folders: 8.41, pdf: 8.23, excel: 8.55, select: 6.87, rpa: 4.99, outcome: 3.33, docs: 5.63, outro: 5.12 },
+        en: { intro: 5.27, stat: 4.37, load: 6.63, table: 4.48, folders: 9.28, pdf: 9.41, excel: 9.60, select: 7.0, rpa: 5.06, outcome: 4.03, docs: 7.25, outro: 5.12 },
+      };
+
+      // Workbook contents (fabricated demo data; sums and nets are consistent
+      // with the payslip shown in scene 4).
+      const ABONO_ROWS = [
+        ['29/03/2024', 'ABONO HABERES EMPRESA DEMO SAC', 'S/ 4,144.85', 'Mar-2024'],
+        ['30/04/2024', 'ABONO HABERES EMPRESA DEMO SAC', 'S/ 4,210.30', 'Abr-2024'],
+        ['31/05/2024', 'ABONO HABERES EMPRESA DEMO SAC', 'S/ 4,098.15', 'May-2024'],
+        ['05/06/2024', 'TRANSF. TERCEROS', 'S/ 350.00', '—'],
+      ];
+      const RENTA_ROWS = [
+        ['Mar-2024', '20601234567', 'EMPRESA DEMO SAC', '4,952.50', '312.40'],
+        ['Abr-2024', '20601234567', 'EMPRESA DEMO SAC', '5,031.20', '327.10'],
+        ['May-2024', '20601234567', 'EMPRESA DEMO SAC', '4,890.00', '305.80'],
+      ];
+      const CONC_ROWS = [
+        ['Mar-2024', '4,144.85', '4,144.85', '0.00'],
+        ['Abr-2024', '4,210.30', '4,210.30', '0.00'],
+        ['May-2024', '4,098.15', '4,098.15', '0.00'],
+      ];
+
+      const vars = (window.__hyperframes && window.__hyperframes.getVariables()) || {};
+      const lang = vars.lang === 'en' ? 'en' : 'es';
+      const copy = COPY[lang];
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-t]').forEach((el) => { el.textContent = copy[el.dataset.t]; });
+
+      // ---- build the two sheets ------------------------------------------------
+      const COL_WIDTHS = [56, 200, 300, 420, 230, 250, 144];
+      const sheet = (host, rows) => {
+        const t = document.createElement('table');
+        const cg = document.createElement('colgroup');
+        COL_WIDTHS.forEach((w) => { const c = document.createElement('col'); c.style.width = `${w}px`; cg.appendChild(c); });
+        t.appendChild(cg);
+        const head = document.createElement('tr');
+        ['', 'A', 'B', 'C', 'D', 'E', 'F'].forEach((l) => { const th = document.createElement('th'); th.textContent = l; head.appendChild(th); });
+        t.appendChild(head);
+        rows.forEach((r, i) => {
+          const tr = document.createElement('tr');
+          if (r.kind) tr.className = r.kind;
+          if (r.id) tr.id = r.id;
+          const rn = document.createElement('td'); rn.className = 'rn'; rn.textContent = String(i + 1); tr.appendChild(rn);
+          if (r.title) {
+            const td = document.createElement('td'); td.className = 'c'; td.colSpan = r.span; td.innerHTML = `<span class="cell">${r.title}</span>`; tr.appendChild(td);
+            for (let k = r.span; k < 6; k++) tr.appendChild(document.createElement('td'));
+          } else {
+            for (let k = 0; k < 6; k++) {
+              const td = document.createElement('td');
+              const v = (r.cells || [])[k];
+              if (v !== undefined && v !== '') {
+                td.className = `c${r.num?.includes(k) ? ' num' : ''}${r.ok?.includes(k) ? ' okc' : ''}`;
+                td.innerHTML = `<span class="cell">${v}</span>`;
+              }
+              tr.appendChild(td);
+            }
+          }
+          t.appendChild(tr);
+        });
+        host.appendChild(t);
+      };
+      sheet(document.getElementById('sh-abono'), [
+        { kind: 'ttl', title: 'ABONOS · BCP · CTA. 191-0000000-0-12 · SOLES', span: 4 },
+        {},
+        { kind: 'hdr', cells: ['FECHA', 'CONCEPTO', 'MONTO', 'RENTA VINCULADA'] },
+        ...ABONO_ROWS.map((c) => ({ kind: 'row', cells: c, num: [2] })),
+      ]);
+      sheet(document.getElementById('sh-rentas'), [
+        { kind: 'ttl', title: 'DETALLE DE BOLETAS DE PAGO PRESENTADOS', span: 5 },
+        { kind: 'hdr', cells: ['PERIODO', 'RUC EMPLEADOR', 'EMPLEADOR', 'RENTA BRUTA', 'RETENCIÓN'] },
+        ...RENTA_ROWS.map((c) => ({ kind: 'row b1', cells: c, num: [3, 4] })),
+        { kind: 'tot', id: 'tot-row', cells: ['TOTAL', '', '', '14,873.70', '945.30'], num: [3, 4] },
+        {},
+        { kind: 'ttl', title: 'CONCILIACIÓN CON EECC', span: 5 },
+        { kind: 'hdr', cells: ['PERIODO', 'NETO BOLETA', 'ABONO EECC', 'DIFERENCIA', 'ESTADO'] },
+        ...CONC_ROWS.map((c) => ({ kind: 'row b2', cells: [...c, '✓ Conciliado'], num: [1, 2, 3], ok: [4] })),
+      ]);
+
+      // ---- subtitles -----------------------------------------------------------
+      // Each segment's lines share its narration time in proportion to length.
+      const subtitle = (seg, host, start) => {
+        const lines = SUBS[lang][seg].split('|');
+        const total = NARRATION_SECONDS[lang][seg];
+        const chars = lines.reduce((n, l) => n + l.length, 0);
+        let t = start;
+        return lines.map((text, i) => {
+          const el = document.createElement('div');
+          el.className = 'sub-line';
+          el.textContent = text;
+          host.appendChild(el);
+          const dur = (total * text.length) / chars;
+          const cue = { el, at: t, until: i === lines.length - 1 ? t + dur + 0.5 : t + dur };
+          t += dur;
+          return cue;
+        });
+      };
+
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const ease = 'power3.out';
+      const startOf = (id) => Number(document.getElementById(id).dataset.start);
+
+      // Scene fades: each scene owns its in/out so overlaps cross-dissolve.
+      const fade = (sel, start, dur, inT = 0.5, outT = 0.5) => {
+        tl.fromTo(sel, { opacity: 0 }, { opacity: 1, duration: inT, ease: 'power1.out' }, start);
+        tl.to(sel, { opacity: 0, duration: outT, ease: 'power1.in' }, start + dur - outT);
+      };
+      const showSubs = (seg, host) => {
+        subtitle(seg, host, startOf(`a-${seg}`)).forEach(({ el, at, until }) => {
+          tl.fromTo(el, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power1.out' }, at);
+          tl.to(el, { opacity: 0, duration: 0.2, ease: 'power1.in' }, until - 0.2);
+        });
+      };
+      const freeSubs = document.getElementById('subs');
+      document.querySelectorAll('[data-sub]').forEach((scene) => showSubs(scene.dataset.sub, scene.querySelector('.caption .subs')));
+      ['intro', 'stat', 'outro'].forEach((seg) => showSubs(seg, freeSubs));
+
+      // 1 · intro
+      fade('#intro', 0, 6, 0.01, 0.4);
+      tl.from('#intro .tag', { y: 20, opacity: 0, duration: 0.6, ease }, 0.2);
+      tl.from('#intro h1', { y: 60, opacity: 0, duration: 0.9, ease }, 0.35);
+      tl.from('#intro .sub', { y: 30, opacity: 0, duration: 0.7, ease }, 0.9);
+      tl.from('#intro .by', { y: 20, opacity: 0, duration: 0.6, ease }, 1.3);
+
+      // 2 · metric: 85 → 7.5, timed to "hoy toma…" / "now it takes…"
+      const S = startOf('stat');
+      fade('#stat', S, 5.8, 0.4, 0.4);
+      tl.from('#stat .label', { y: 20, opacity: 0, duration: 0.5, ease }, S + 0.2);
+      tl.from('#stat .row', { y: 30, opacity: 0, duration: 0.6, ease }, S + 0.35);
+      const counter = { v: 85 };
+      const decimal = lang === 'es' ? ',' : '.';
+      tl.to(counter, {
+        v: 7.5, duration: 1.4, ease: 'power2.inOut',
+        onUpdate: () => {
+          const n = counter.v;
+          document.getElementById('count').textContent =
+            n >= 10 ? String(Math.round(n)) : n.toFixed(1).replace('.', decimal);
+        },
+      }, S + 2.6);
+      tl.fromTo('#stat .before', { '--strike': 0 }, { '--strike': 1, duration: 0.5, ease: 'power2.out' }, S + 3.8);
+      tl.from('#stat .badge', { scale: 0.6, opacity: 0, duration: 0.5, ease: 'back.out(2)' }, S + 4.0);
+      tl.from('#stat .note', { y: 16, opacity: 0, duration: 0.5, ease }, S + 4.3);
+
+      // footage: slide the window in, slow push-in, caption rises
+      const shot = (id, video, dur, push = 1.035) => {
+        const start = startOf(video);
+        fade(`#${id}`, start, dur, 0.4, 0.4);
+        tl.fromTo(`#${id} .window`, { y: 40, scale: 0.985 }, { y: 0, scale: 1, duration: 0.7, ease }, start);
+        tl.to(`#${id} .window`, { scale: push, duration: dur - 0.7, ease: 'none' }, start + 0.7);
+        tl.from(`#${id} .caption`, { y: 30, opacity: 0, duration: 0.5, ease }, start + 0.35);
+        return start;
+      };
+      // Zoom toward the dialogs (overrides the slow push from that point on).
+      const zoomTo = (id, at, scale, ox, oy, dur = 0.9) => {
+        tl.set(`#${id} .window`, { transformOrigin: `${ox}% ${oy}%` }, at);
+        tl.to(`#${id} .window`, { scale, duration: dur, ease: 'power2.inOut', overwrite: 'auto' }, at);
+      };
+      const docScene = (id, dur) => {
+        const start = startOf(id);
+        fade(`#${id}`, start, dur, 0.4, 0.4);
+        tl.from(`#${id} .caption`, { y: 30, opacity: 0, duration: 0.5, ease }, start + 0.35);
+        return start;
+      };
+
+      // 3 · data load
+      const L = docScene('load', 7.8);
+      tl.from('#sources .src, #sources .or', { x: -40, opacity: 0, duration: 0.6, ease, stagger: 0.15 }, L + 0.2);
+      tl.from('#loader', { x: 40, opacity: 0, duration: 0.7, ease }, L + 0.3);
+      tl.to('#src-xls', { borderColor: 'rgba(52, 211, 153, 0.7)', backgroundColor: 'rgba(52, 211, 153, 0.08)', duration: 0.3 }, L + 1.2);
+      tl.to('#src-db', { borderColor: 'rgba(129, 140, 248, 0.7)', backgroundColor: 'rgba(129, 140, 248, 0.08)', duration: 0.3 }, L + 3.0);
+      tl.fromTo('#flow i', { x: -50 }, { x: 140, duration: 0.7, ease: 'none', repeat: 5 }, L + 1.3);
+      tl.from('#loader .log div', { opacity: 0, x: -12, duration: 0.3, stagger: 0.75 }, L + 1.4);
+      tl.from('#loader .found', { opacity: 0, y: 16, duration: 0.4, ease }, L + 4.4);
+      const nc = { n: 0 };
+      tl.to(nc, { n: 18, duration: 1.2, ease: 'power2.out', onUpdate: () => { document.getElementById('ncases').textContent = String(Math.round(nc.n)); } }, L + 4.5);
+      tl.from('#loader .cases div', { opacity: 0, y: 12, duration: 0.35, ease, stagger: 0.15 }, L + 4.9);
+
+      // 4 · table
+      shot('s1', 'v1', 6.4);
+
+      // 5 · folders, then the first one fills with its downloads
+      const F = docScene('folders', 10.4);
+      tl.from('#explorer', { y: 40, opacity: 0, duration: 0.7, ease }, F);
+      tl.from('#explorer .fr', { opacity: 0, x: -20, duration: 0.3, ease, stagger: 0.3 }, F + 0.8);
+      tl.to('#fr1', { backgroundColor: '#dbeafe', duration: 0.3 }, F + 3.0);
+      tl.from('#explorer .ch', { opacity: 0, duration: 0.3 }, F + 3.0);
+      [3.6, 4.6, 5.0, 5.4, 6.2, 7.0].forEach((t, i) => {
+        const row = `#dl${i + 1}`;
+        tl.from(row, { opacity: 0, x: 20, duration: 0.3, ease }, F + t);
+        tl.to(`${row} .nf b i`, { scaleX: 1, duration: 0.5, ease: 'power1.inOut' }, F + t + 0.1);
+        tl.set('#it1', { textContent: String(i + 1) }, F + t + 0.6);
+      });
+      tl.fromTo('#nobrowser', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, ease }, F + 8.0);
+
+      // 4 · PDF → fields
+      const P = docScene('pdf', 10.3);
+      tl.from('#pdfwin', { x: -60, opacity: 0, duration: 0.8, ease }, P);
+      tl.from('#extract', { x: 60, opacity: 0, duration: 0.8, ease }, P + 0.3);
+      tl.to('#ocr', { opacity: 1, duration: 0.3 }, P + 3.5);
+      tl.fromTo('#scan', { opacity: 1, y: -90 }, { y: 760, duration: 2.0, ease: 'none' }, P + 3.5);
+      tl.to('#scan', { opacity: 0, duration: 0.2 }, P + 5.5);
+      tl.to('#ocr', { opacity: 0, duration: 0.3 }, P + 5.7);
+      const extract = (hl, key, at) => {
+        tl.to(hl, { backgroundColor: 'rgba(250, 204, 21, 0.55)', boxShadow: '0 0 0 3px rgba(250, 204, 21, 0.9)', duration: 0.25 }, at);
+        tl.fromTo(`#x-${key}`, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.4, ease }, at + 0.25);
+        tl.fromTo(`#ok-${key}`, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.3, ease: 'back.out(2)' }, at + 0.5);
+      };
+      extract('#boleta .co', 'emp', P + 5.3);
+      extract('#hl-ruc', 'ruc', P + 5.7);
+      extract('#hl-per', 'per', P + 6.1);
+      extract('#hl-renta', 'renta', P + 6.8);
+      extract('#hl-ret', 'ret', P + 7.5);
+      tl.to('#extract .fill', { scaleX: 1, duration: 1.4, ease: 'power1.inOut' }, P + 7.9);
+      const pc = { n: 1 };
+      tl.to(pc, { n: 3, duration: 1.4, ease: 'none', onUpdate: () => { document.getElementById('pcount').textContent = `${Math.round(pc.n)} / 3`; } }, P + 7.9);
+
+      // 5 · Excel
+      const E = docScene('excel', 10.9);
+      tl.from('#xlwin', { y: 40, opacity: 0, duration: 0.7, ease }, E);
+      tl.set('#sh-abono', { opacity: 1 }, E);
+      tl.set('#tab-abono i', { opacity: 1 }, E);
+      tl.from('#sh-abono tr.ttl .cell, #sh-abono tr.hdr .cell', { opacity: 0, duration: 0.3, stagger: 0.05 }, E + 0.8);
+      tl.from('#sh-abono tr.row .cell', { opacity: 0, x: -10, duration: 0.25, stagger: 0.06 }, E + 1.4);
+      tl.set('#namebox', { textContent: 'C7' }, E + 3.0);
+      // switch to "Rentas Detalle" when the narration reaches "el detalle de rentas"
+      const SW = E + 4.7;
+      tl.set('#tab-abono i', { opacity: 0 }, SW);
+      tl.set('#tab-rentas i', { opacity: 1 }, SW);
+      tl.to('#sh-abono', { opacity: 0, duration: 0.2 }, SW);
+      tl.to('#sh-rentas', { opacity: 1, duration: 0.2 }, SW);
+      tl.set('#namebox', { textContent: 'A1' }, SW);
+      tl.from('#sh-rentas tr.ttl .cell, #sh-rentas tr.hdr .cell', { opacity: 0, duration: 0.25, stagger: 0.04 }, SW + 0.2);
+      tl.from('#sh-rentas tr.b1 .cell', { opacity: 0, x: -10, duration: 0.22, stagger: 0.04 }, SW + 0.5);
+      tl.from('#tot-row .cell', { opacity: 0, duration: 0.25, stagger: 0.05 }, SW + 1.4);
+      tl.set('#namebox', { textContent: 'D7' }, SW + 1.6);
+      tl.to('#tot-row td:nth-child(5)', { boxShadow: 'inset 0 0 0 3px #217346', backgroundColor: '#ecfdf5', duration: 0.2 }, SW + 1.6);
+      tl.to('#f-sum', { opacity: 1, duration: 0.2 }, SW + 1.6);
+      tl.from('#sh-rentas tr.b2 .cell', { opacity: 0, x: -10, duration: 0.22, stagger: 0.05 }, SW + 2.4);
+      tl.to('#tot-row td:nth-child(5)', { boxShadow: 'inset 0 0 0 0 #217346', backgroundColor: '#ffffff', duration: 0.2 }, SW + 3.6);
+      tl.to('#f-sum', { opacity: 0, duration: 0.2 }, SW + 3.6);
+      tl.set('#namebox', { textContent: 'E11' }, SW + 3.6);
+      tl.to('#sh-rentas td.okc', { backgroundColor: '#dcfce7', duration: 0.3, stagger: 0.1 }, SW + 3.6);
+      tl.to('#f-chk', { opacity: 1, duration: 0.2 }, SW + 3.6);
+
+      // 6 · selection + preflight, 7 · RPA run, 8 · outcome
+      const s2 = shot('s2', 'v2', 9.2, 1.02);
+      zoomTo('s2', s2 + 7.2, 1.32, 50, 52);       // pre-flight dialog
+      const s3 = shot('s3', 'v3', 8.8, 1.02);
+      zoomTo('s3', s3 + 1.2, 1.42, 50, 42);       // live progress overlay
+      const s4 = shot('s4', 'v4', 5.5, 1.04);
+      zoomTo('s4', s4 + 0.8, 1.3, 50, 62, 1.2);   // per-case summary + the failure
+
+      // 9 · Word mail-merge, then the PDF case file gets foliated and signed
+      const D = docScene('docs', 10.1);
+      tl.from('#wordwin', { x: -60, opacity: 0, duration: 0.8, ease }, D);
+      ['#m1', '#m2', '#m3', '#m4'].forEach((f, i) => {
+        const at = D + 1.1 + i * 0.5;
+        tl.to(`${f} .ph`, { opacity: 0, duration: 0.2 }, at);
+        tl.to(`${f} .val`, { opacity: 1, duration: 0.25 }, at + 0.1);
+        tl.fromTo(f, { backgroundColor: 'rgba(250, 204, 21, 0)' }, { backgroundColor: 'rgba(250, 204, 21, 0.5)', duration: 0.2 }, at);
+        tl.to(f, { backgroundColor: 'rgba(250, 204, 21, 0)', duration: 0.8 }, at + 0.6);
+      });
+      tl.from('#pdfcase', { x: 60, opacity: 0, duration: 0.8, ease }, D + 3.2);
+      tl.from('#pages .pg', { y: 30, opacity: 0, duration: 0.5, ease, stagger: 0.12 }, D + 3.5);
+      ['#st1', '#st2', '#st3'].forEach((s, i) => {
+        tl.fromTo(s, { opacity: 0, scale: 1.8 }, { opacity: 0.92, scale: 1, duration: 0.25, ease: 'power4.in' }, D + 4.8 + i * 0.5);
+      });
+      const sig = document.getElementById('sigpath');
+      const sigLen = sig.getTotalLength();
+      tl.fromTo(sig, { strokeDasharray: sigLen, strokeDashoffset: sigLen }, { strokeDashoffset: 0, duration: 1.0, ease: 'power1.inOut' }, D + 6.4);
+      tl.fromTo('#signed', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, ease }, D + 7.4);
+
+      // 10 · outro
+      const O = startOf('outro');
+      fade('#outro', O, 7.3, 0.5, 0.01);
+      tl.from('#outro .tag', { y: 20, opacity: 0, duration: 0.5, ease }, O + 0.2);
+      tl.from('#outro .card', { y: 40, opacity: 0, duration: 0.6, ease, stagger: 0.12 }, O + 0.35);
+      tl.from('#outro .stack', { y: 20, opacity: 0, duration: 0.5, ease }, O + 1.1);
+      tl.from('#outro .url', { y: 20, opacity: 0, duration: 0.5, ease }, O + 1.4);
+
+      window.__timelines['main'] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

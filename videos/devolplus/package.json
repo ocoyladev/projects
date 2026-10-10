@@ -1,0 +1,13 @@
+{
+  "name": "devolplus-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "narration:es": "mkdir -p assets/audio/current && cp assets/audio/es/*.wav assets/audio/current/",
+    "narration:en": "mkdir -p assets/audio/current && cp assets/audio/en/*.wav assets/audio/current/",
+    "dev": "npm run narration:es && npx --yes hyperframes@0.8.72 preview",
+    "check": "npm run narration:es && npx --yes hyperframes@0.8.72 check",
+    "render:es": "npm run narration:es && npx --yes hyperframes@0.8.72 render --video-frame-format png --output renders/devolplus-es.mp4 --variables '{\"lang\":\"es\"}'",
+    "render:en": "npm run narration:en && npx --yes hyperframes@0.8.72 render --video-frame-format png --output renders/devolplus-en.mp4 --variables '{\"lang\":\"en\"}'"
+  }
+}
