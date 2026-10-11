@@ -69,6 +69,16 @@ export const projects: Project[] = [
       '/src/img/cejtracking/05-como-funciona.webp',
       '/src/img/cejtracking/06-planes.webp',
     ],
+    video: {
+      src: {
+        en: '/src/video/cejtracking/cejtracking-en.mp4',
+        es: '/src/video/cejtracking/cejtracking-es.mp4',
+      },
+      poster: {
+        en: '/src/video/cejtracking/poster-en.jpg',
+        es: '/src/video/cejtracking/poster-es.jpg',
+      },
+    },
     demo: { kind: 'live' },
     liveUrl: 'https://cej.pinpontech.com',
   },
