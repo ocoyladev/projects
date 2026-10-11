@@ -110,6 +110,7 @@ export const projects: Project[] = [
       '/src/img/formagent/04-ejecucion.webp',
       '/src/img/formagent/05-resultados.webp',
     ],
+    video: { src: { en: '/src/video/formagent/formagent-en.mp4', es: '/src/video/formagent/formagent-es.mp4' }, poster: { en: '/src/video/formagent/poster-en.jpg', es: '/src/video/formagent/poster-es.jpg' } },
     demo: { kind: 'gallery' },
   },
   {
