@@ -1,0 +1,66 @@
+{
+  "voices": {
+    "es": {
+      "voice": "ef_dora",
+      "lang": "es-419",
+      "speed": 1.12
+    },
+    "en": {
+      "voice": "af_heart",
+      "lang": "en-us",
+      "speed": 1.05
+    }
+  },
+  "segments": [
+    {
+      "id": "intro",
+      "es": "C E J Tracking. Un sas para estudios de abogados, que vigila sus expedientes judiciales por ellos.",
+      "en": "C E J Tracking. A sass for law firms that watches their court cases for them."
+    },
+    {
+      "id": "problem",
+      "es": "Hoy, un abogado revisa el portal del Poder Judicial expediente por expediente, todos los días, para no perderse un plazo.",
+      "en": "Today, a lawyer checks the judiciary's portal case by case, every day, so as not to miss a deadline."
+    },
+    {
+      "id": "register",
+      "es": "Basta con registrar cada expediente una vez: el número y la parte.",
+      "en": "Each case is registered just once: the case number and the party."
+    },
+    {
+      "id": "schedule",
+      "es": "Un programador reparte las consultas en una cola, y wórkers en nodos separados abren el portal con un navegador automatizado, a un ritmo que no lo satura.",
+      "en": "A scheduler puts the checks on a queue, and workers on separate nodes open the portal in an automated browser, at a pace that doesn't overload it."
+    },
+    {
+      "id": "diff",
+      "es": "Cada resultado se compara con la línea base guardada: así detecta escritos, resoluciones y notificaciones nuevas, y descarga el documento.",
+      "en": "Each result is compared against the stored baseline, so it spots new filings, rulings and notices, and downloads the document."
+    },
+    {
+      "id": "alert",
+      "es": "Apenas hay una novedad, envía un correo con el documento adjunto o enlazado; en los planes pagos, también por guatsap.",
+      "en": "As soon as something changes, it emails an alert with the document attached or linked, and on paid plans, on WhatsApp too."
+    },
+    {
+      "id": "panel",
+      "es": "En el panel, cada expediente tiene su línea de tiempo: novedades, actuaciones y documentos.",
+      "en": "In the panel, every case has its own timeline: new events, acts and documents."
+    },
+    {
+      "id": "ops",
+      "es": "Desde administración se ven usuarios, planes, nodos y trabajos; y si el portal se pone lento, el control de ritmo y los reintentos mantienen el servicio estable.",
+      "en": "The admin side covers users, plans, nodes and jobs, and when the portal slows down, pacing and retries keep the service stable."
+    },
+    {
+      "id": "infra",
+      "es": "Corre en A W S, con infraestructura como código en Terraform: servidores E C dos, correo con S E S, y documentos cifrados en S tres.",
+      "en": "It runs on AWS, with infrastructure as code in Terraform: E C 2 servers, email through S E S, and encrypted documents in S 3."
+    },
+    {
+      "id": "outro",
+      "es": "Más de ochenta endpoints y setecientos noventa y cuatro tests, ya en producción.",
+      "en": "Over eighty endpoints and seven hundred ninety-four tests, live in production."
+    }
+  ]
+}

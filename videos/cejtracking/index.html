@@ -1,0 +1,1036 @@
+<!doctype html>
+<html
+  lang="es"
+  data-composition-variables='[{"id":"lang","type":"string","label":"Language (es | en)","default":"es"}]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: Inter; font-weight: 400; src: url(assets/fonts/inter-latin-400-normal.woff2) format('woff2'); }
+      @font-face { font-family: Inter; font-weight: 600; src: url(assets/fonts/inter-latin-600-normal.woff2) format('woff2'); }
+      @font-face { font-family: Inter; font-weight: 800; src: url(assets/fonts/inter-latin-800-normal.woff2) format('woff2'); }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url(assets/fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2'); }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 600; src: url(assets/fonts/jetbrains-mono-latin-600-normal.woff2) format('woff2'); }
+
+      /* Portfolio palette (dark theme) for the frame; CEJTracking's own palette for its UI. */
+      :root {
+        --bg: #07070f;
+        --ink: #f1f5f9;
+        --muted: #94a3b8;
+        --line: rgba(255, 255, 255, 0.1);
+        --blue: #60a5fa;
+        --indigo: #818cf8;
+        --violet: #a78bfa;
+        --emerald: #34d399;
+        --amber: #fbbf24;
+        --grad: linear-gradient(135deg, var(--blue) 0%, var(--indigo) 50%, var(--violet) 100%);
+        --ct-primary: #1f3a5f;
+        --ct-primary-strong: #032448;
+        --ct-accent: #0ea5a4;
+        --ct-accent-strong: #006a69;
+        --ct-accent-soft: #ccf5f4;
+        --ct-novedad: #f59e0b;
+        --ct-novedad-soft: #fff3d6;
+        --ct-success: #16a34a;
+        --ct-success-soft: #dcfce7;
+        --ct-danger: #dc2626;
+        --ct-canvas: #f7f8fa;
+        --ct-line: #e5e7eb;
+        --ct-muted: #475569;
+        --ct-ink: #0b1220;
+        --wa: #1da851;
+        --aws: #ff9900;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+      #root {
+        position: relative; width: 100%; height: 100%; overflow: hidden;
+        font-family: Inter, 'DejaVu Sans', sans-serif; color: var(--ink);
+        background:
+          radial-gradient(1200px 700px at 78% 12%, rgba(129, 140, 248, 0.16), transparent 60%),
+          radial-gradient(900px 600px at 10% 95%, rgba(96, 165, 250, 0.12), transparent 60%),
+          var(--bg);
+      }
+      #grid {
+        position: absolute; inset: 0; opacity: 0.35;
+        background-image: radial-gradient(rgba(148, 163, 184, 0.35) 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+      .scene { position: absolute; inset: 0; opacity: 0; }
+      .mono { font-family: 'JetBrains Mono', 'DejaVu Sans Mono', monospace; }
+      .tag { font-size: 26px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+      .tag b { color: var(--blue); font-weight: 600; }
+      .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+      /* Step caption: number + heading + the subtitle of what is being said. */
+      .caption {
+        position: absolute; left: 160px; right: 160px; bottom: 34px; height: 112px; z-index: 5;
+        display: flex; align-items: center; gap: 28px; padding: 0 34px; border-radius: 20px;
+        background: rgba(7, 7, 15, 0.86); border: 1px solid var(--line); backdrop-filter: blur(8px);
+      }
+      .caption .n { font-size: 30px; font-weight: 600; padding: 10px 16px; border-radius: 12px; background: rgba(96, 165, 250, 0.14); color: var(--blue); }
+      .caption h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; }
+      .caption .subs { position: relative; flex: 1; height: 100%; border-left: 1px solid var(--line); padding-left: 28px; }
+      .sub-line {
+        position: absolute; left: 28px; right: 0; top: 50%; transform: translateY(-50%);
+        font-size: 27px; line-height: 1.3; color: #e2e8f0; opacity: 0;
+      }
+      #subs { position: absolute; left: 260px; right: 260px; bottom: 46px; height: 96px; z-index: 6; }
+      #subs .sub-line { left: 0; text-align: center; font-size: 32px; color: var(--ink); text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9); }
+
+      /* Light app windows (browser, mail client, admin panel). */
+      .win {
+        position: absolute; border-radius: 18px; overflow: hidden; background: #fff; color: var(--ct-ink);
+        box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--line);
+      }
+      .win .bar {
+        position: absolute; left: 0; right: 0; top: 0; height: 44px; background: #e2e8f0; z-index: 3;
+        display: flex; align-items: center; gap: 10px; padding: 0 18px;
+      }
+      .win .bar i { width: 14px; height: 14px; border-radius: 50%; display: block; }
+      .win .bar .r { background: #f87171; } .win .bar .y { background: #fbbf24; } .win .bar .g { background: #34d399; }
+      .win .bar span { margin-left: 14px; font-size: 17px; color: #475569; }
+      .win .body { position: absolute; left: 0; right: 0; top: 44px; bottom: 0; }
+      .cursor { position: absolute; left: 0; top: 0; width: 30px; height: 30px; z-index: 20; pointer-events: none; }
+
+      /* App screenshots in a browser window. */
+      .shotwin { left: 160px; top: 54px; width: 1600px; height: 900px; transform-origin: 50% 40%; }
+      .shotwin .screen { position: absolute; left: 0; top: 44px; width: 1600px; height: 1000px; }
+
+      /* CEJTracking form controls. */
+      .fld label { display: block; font-size: 17px; font-weight: 600; color: var(--ct-primary-strong); }
+      .fld label small { font-weight: 400; color: var(--ct-muted); font-size: 16px; }
+      .inp {
+        position: relative; margin-top: 6px; height: 50px; border: 1px solid #cbd5e1; border-radius: 10px;
+        display: flex; align-items: center; padding: 0 16px; font-size: 19px; background: #fff;
+      }
+      .inp .ph { position: absolute; left: 16px; color: #64748b; }
+      .inp .val { position: relative; color: var(--ct-ink); }
+      .inp.on { border-color: var(--ct-accent); box-shadow: 0 0 0 3px rgba(14, 165, 164, 0.25); }
+      .help { margin-top: 6px; font-size: 14px; color: var(--ct-muted); }
+      .btn { display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 22px; border-radius: 10px; font-size: 17px; font-weight: 600; }
+      .btn.pri { background: var(--ct-primary); color: #fff; }
+      .btn.sec { background: #fff; color: var(--ct-primary-strong); border: 1px solid var(--ct-line); }
+      .pill { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 999px; font-size: 15px; font-weight: 600; }
+      .pill::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+      .pill.nov { background: var(--ct-novedad-soft); color: #92400e; }
+      .pill.ok { background: var(--ct-success-soft); color: #166534; }
+      .pill.q { background: var(--ct-accent-soft); color: var(--ct-accent-strong); }
+      .pill.warn { background: #fee2e2; color: #991b1b; }
+
+      /* 1 · intro */
+      #intro { display: flex; flex-direction: column; justify-content: center; padding: 0 180px 80px; }
+      #intro h1 { font-size: 200px; font-weight: 800; letter-spacing: -0.045em; line-height: 1; margin: 28px 0 36px; }
+      #intro .sub { font-size: 46px; font-weight: 600; max-width: 1600px; line-height: 1.2; }
+      #intro .by { margin-top: 34px; font-size: 28px; color: var(--muted); }
+
+      /* 2 · the manual routine */
+      #portal { left: 160px; top: 110px; width: 940px; height: 700px; }
+      #portal .body { background: #f1f5f9; padding: 40px 54px; }
+      #portal h3 { font-size: 30px; color: #1e293b; }
+      #portal .lead { margin-top: 8px; font-size: 18px; color: #475569; }
+      #portal .form { margin-top: 30px; padding: 30px; border-radius: 14px; background: #fff; border: 1px solid #e2e8f0; display: grid; gap: 22px; }
+      #portal .inp { font-family: 'JetBrains Mono', monospace; }
+      #portal .btn { justify-self: start; }
+      #portal .res { margin-top: 26px; height: 120px; border-radius: 14px; border: 1px dashed #cbd5e1; display: grid; place-items: center; color: #64748b; font-size: 18px; }
+      #portal .spin { display: inline-block; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #cbd5e1; border-top-color: #475569; margin-right: 12px; vertical-align: middle; }
+      #routine { position: absolute; left: 1160px; top: 110px; width: 600px; height: 700px; padding: 34px 36px; border-radius: 22px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); }
+      #routine .clock { display: flex; align-items: baseline; gap: 16px; }
+      #routine .clock b { font-size: 84px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+      #routine .clock span { font-size: 24px; color: var(--muted); }
+      #routine .days { margin: 18px 0 22px; display: flex; gap: 10px; }
+      #routine .days i { font-style: normal; flex: 1; text-align: center; padding: 8px 0; border-radius: 10px; font-size: 18px; color: var(--muted); border: 1px solid var(--line); }
+      #routine .row { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid var(--line); font-size: 19px; }
+      #routine .box { flex: none; width: 26px; height: 26px; border-radius: 7px; border: 2px solid #475569; display: grid; place-items: center; font-size: 17px; color: transparent; }
+      #routine .row .num { flex: 1; color: #cbd5e1; }
+
+      /* 3 · register a case (modal over the real panel) */
+      #regwin .screen { filter: blur(3px); }
+      #regwin .dim { position: absolute; left: 0; right: 0; top: 44px; bottom: 0; background: rgba(3, 36, 72, 0.5); }
+      #modal {
+        position: absolute; left: 400px; top: 82px; width: 800px; padding: 30px 36px; border-radius: 18px; background: #fff;
+        box-shadow: 0 30px 80px rgba(3, 36, 72, 0.45); display: grid; gap: 18px;
+      }
+      #modal .mh { display: flex; justify-content: space-between; align-items: center; font-size: 26px; font-weight: 800; color: var(--ct-primary-strong); }
+      #modal .mh span { color: #94a3b8; font-weight: 400; }
+      #segs { margin-top: 8px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+      #segs div { border-radius: 8px; background: var(--ct-canvas); padding: 5px 0; text-align: center; }
+      #segs b { display: block; font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--ct-primary-strong); }
+      #segs small { display: block; font-size: 12px; color: var(--ct-muted); }
+      #modal .tip { margin-top: 8px; padding: 10px 14px; border-radius: 10px; background: rgba(255, 243, 214, 0.7); color: #7a4a00; font-size: 14px; line-height: 1.4; }
+      #modal .acts { display: flex; justify-content: flex-end; gap: 12px; }
+      #toast {
+        position: absolute; right: 40px; bottom: 40px; z-index: 4; padding: 18px 24px; border-radius: 14px; background: var(--ct-primary-strong); color: #fff;
+        font-size: 19px; box-shadow: 0 20px 50px rgba(3, 36, 72, 0.4); opacity: 0;
+      }
+      #toast b { color: #5eead4; }
+
+      /* 4 · scheduler → queue → worker nodes → automated browser */
+      .panel { position: absolute; padding: 28px 30px; border-radius: 22px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); }
+      .panel h4 { font-size: 20px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+      #sched { left: 160px; top: 60px; width: 470px; height: 820px; }
+      #sched .times { margin: 18px 0 26px; display: flex; gap: 14px; }
+      #sched .times div { flex: 1; padding: 16px 0; text-align: center; border-radius: 14px; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); font-size: 38px; font-weight: 800; }
+      .job { display: flex; align-items: center; gap: 12px; height: 62px; padding: 0 16px; margin-top: 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); font-size: 17px; }
+      .job .c { flex: 1; color: #e2e8f0; }
+      .job em { font-style: normal; font-size: 15px; color: var(--muted); }
+      #nodes { left: 680px; top: 60px; width: 520px; height: 820px; }
+      .node { margin-top: 18px; padding: 20px 22px; border-radius: 16px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); }
+      .node .nh { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 600; }
+      .node .nh i { width: 12px; height: 12px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.18); }
+      .node .nh span { margin-left: auto; font-size: 16px; color: var(--muted); font-weight: 400; }
+      .node .cur { margin-top: 12px; font-size: 17px; color: #cbd5e1; height: 24px; }
+      .node .track { margin-top: 12px; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+      .node .fill { height: 100%; width: 100%; background: var(--grad); transform: scaleX(0); transform-origin: left; }
+      #pace { margin-top: 22px; padding: 16px 18px; border-radius: 14px; font-size: 19px; color: var(--emerald); background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.3); }
+      #browser { left: 1250px; top: 60px; width: 510px; height: 820px; }
+      #browser .body { background: #f1f5f9; padding: 28px 26px; }
+      #browser .auto { position: absolute; right: 16px; top: 8px; z-index: 4; padding: 4px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; background: #312e81; color: #e0e7ff; }
+      #browser h5 { font-size: 21px; color: #1e293b; }
+      #browser .fld { margin-top: 18px; }
+      #browser .inp { font-size: 16px; height: 44px; font-family: 'JetBrains Mono', monospace; }
+      #browser .btn { margin-top: 18px; height: 42px; font-size: 16px; background: #334155; color: #fff; }
+      #browser .rs { margin-top: 22px; font-size: 15px; color: #334155; }
+      #browser .rs div { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid #e2e8f0; }
+      #browser .rs div b { flex: none; width: 96px; color: #475569; font-weight: 600; }
+
+      /* 5 · baseline vs today */
+      .cmp { position: absolute; top: 60px; width: 760px; height: 820px; }
+      #base { left: 160px; } #today { left: 1000px; }
+      .cmp .sub { margin-top: 6px; font-size: 17px; color: var(--muted); }
+      .act { position: relative; display: grid; grid-template-columns: 130px 1fr; gap: 4px 16px; padding: 16px 18px; margin-top: 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); }
+      .act .d { grid-row: span 2; font-size: 16px; color: var(--muted); padding-top: 3px; }
+      .act b { font-size: 19px; font-weight: 600; }
+      .act span { font-size: 16px; color: #cbd5e1; }
+      .act .eq { position: absolute; left: -62px; top: 50%; width: 44px; height: 44px; margin-top: -22px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; font-weight: 800; color: var(--emerald); background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.4); opacity: 0; }
+      .act.new { border-color: rgba(251, 191, 36, 0.9); background: rgba(251, 191, 36, 0.1); }
+      .act .newtag { position: absolute; right: 16px; top: 16px; padding: 3px 12px; border-radius: 8px; font-size: 15px; font-weight: 800; color: #1c1917; background: var(--amber); opacity: 0; }
+      .kinds { margin-top: 14px; display: flex; gap: 10px; }
+      .kinds i { font-style: normal; padding: 6px 14px; border-radius: 10px; font-size: 16px; color: var(--muted); border: 1px solid var(--line); }
+      #doc { margin-top: 18px; display: flex; align-items: center; gap: 18px; padding: 18px 20px; border-radius: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); opacity: 0; }
+      .fi { flex: none; width: 46px; height: 54px; border-radius: 8px; display: grid; place-items: center; font-size: 13px; font-weight: 800; color: #fff; background: #b91c1c; font-family: 'JetBrains Mono', monospace; }
+      #doc .nf { flex: 1; }
+      #doc .nf span { display: block; font-size: 18px; }
+      #doc .nf b { display: block; margin-top: 10px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+      #doc .nf b i { display: block; height: 100%; width: 100%; background: var(--emerald); transform: scaleX(0); transform-origin: left; }
+      #doc em { font-style: normal; font-size: 16px; color: var(--emerald); font-weight: 600; opacity: 0; }
+
+      /* 6 · e-mail + WhatsApp alert */
+      #mail { left: 140px; top: 54px; width: 1150px; height: 840px; }
+      #mail .body { display: grid; grid-template-columns: 360px 1fr; }
+      #mail .inbox { background: #f8fafc; border-right: 1px solid #e2e8f0; }
+      #mail .ih { padding: 20px 22px; font-size: 20px; font-weight: 800; color: #0f172a; border-bottom: 1px solid #e2e8f0; }
+      .msg { padding: 16px 22px; border-bottom: 1px solid #e2e8f0; font-size: 15px; color: #526075; }
+      .msg b { display: block; font-size: 16px; color: #334155; font-weight: 600; }
+      .msg span { display: block; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      #m-new { background: #e0f2fe; border-left: 4px solid var(--ct-accent); }
+      #m-new b { color: #0f172a; font-weight: 800; }
+      #mail .read { padding: 30px 40px; }
+      #mail .from { display: flex; align-items: center; gap: 14px; font-size: 16px; color: #64748b; }
+      #mail .av { width: 44px; height: 44px; border-radius: 10px; background: var(--ct-primary); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 16px; }
+      #mail .from b { display: block; color: #0f172a; font-size: 17px; }
+      #mail .subj { margin: 22px 0 18px; font-size: 25px; font-weight: 800; color: #0f172a; line-height: 1.3; }
+      #mail .card { padding: 22px 24px; border-radius: 14px; border: 1px solid #fcd34d; background: #fffbeb; }
+      #mail .card .t { margin-top: 10px; font-size: 20px; font-weight: 800; color: #0f172a; }
+      #mail .card .s { margin-top: 8px; font-size: 17px; color: #334155; }
+      #mail .p { margin: 18px 0; font-size: 17px; color: #334155; line-height: 1.5; }
+      #att { display: inline-flex; align-items: center; gap: 14px; padding: 12px 18px 12px 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 16px; color: #0f172a; }
+      #att .fi { width: 38px; height: 44px; font-size: 11px; }
+      #att small { display: block; color: #64748b; font-size: 14px; }
+      #mail .cta { margin-top: 22px; }
+      #phone { position: absolute; left: 1360px; top: 90px; width: 400px; height: 780px; border-radius: 52px; background: #0b1220; border: 10px solid #1e293b; box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6); overflow: hidden; }
+      #phone .time { margin-top: 70px; text-align: center; font-size: 72px; font-weight: 600; color: #e2e8f0; }
+      #phone .date { text-align: center; font-size: 18px; color: var(--muted); }
+      #wa { position: absolute; left: 16px; right: 16px; top: 250px; padding: 16px 18px; border-radius: 22px; background: rgba(241, 245, 249, 0.96); color: #0f172a; font-size: 16px; line-height: 1.4; }
+      #wa .h { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #475569; margin-bottom: 6px; }
+      #wa .h i { width: 26px; height: 26px; border-radius: 7px; background: var(--wa); display: grid; place-items: center; color: #fff; font-style: normal; font-size: 15px; }
+      #wa .h span { margin-left: auto; }
+      #wa b { display: block; }
+      #paid { position: absolute; left: 1430px; top: 40px; padding: 8px 18px; border-radius: 12px; font-size: 18px; font-weight: 600; color: #bbf7d0; background: rgba(29, 168, 81, 0.18); border: 1px solid rgba(29, 168, 81, 0.5); }
+
+      /* 7 · real panel screenshots */
+      .shotwin .screen.s2, .shotwin .screen.s3 { opacity: 0; }
+
+      /* 8 · admin: nodes, portal latency, pacing, retries */
+      #admin { left: 160px; top: 40px; width: 1600px; height: 870px; }
+      #admin .body { display: grid; grid-template-columns: 250px 1fr; background: var(--ct-canvas); }
+      #admin nav { background: #fff; border-right: 1px solid var(--ct-line); padding: 24px 16px; }
+      #admin .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+      #admin .brand i { width: 40px; height: 40px; border-radius: 10px; background: var(--ct-primary); color: #fff; display: grid; place-items: center; font-style: normal; font-weight: 800; font-size: 15px; }
+      #admin .brand b { display: block; font-size: 19px; color: var(--ct-primary-strong); }
+      #admin .brand small { display: block; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--ct-accent-strong); }
+      #admin nav div.it { padding: 10px 14px; border-radius: 10px; font-size: 17px; color: #334155; margin-bottom: 4px; }
+      #admin nav div.it.on { background: var(--ct-primary); color: #fff; font-weight: 600; }
+      #admin main { padding: 26px 32px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto 1fr; gap: 20px; }
+      #admin h3 { grid-column: span 2; font-size: 28px; color: var(--ct-primary-strong); }
+      #admin h3 small { display: block; margin-top: 4px; font-size: 16px; font-weight: 400; color: var(--ct-muted); }
+      .acard { padding: 20px 22px; border-radius: 14px; background: #fff; border: 1px solid var(--ct-line); }
+      .acard h6 { font-size: 15px; font-weight: 600; color: var(--ct-muted); }
+      #nodecards { grid-column: span 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      #nodecards .acard b { display: block; margin-top: 8px; font-size: 22px; color: var(--ct-ink); }
+      #nodecards .acard .pill { margin-top: 10px; }
+      #lat svg { margin-top: 10px; display: block; }
+      #lat .ln { fill: none; stroke: var(--ct-accent); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+      #lat .th { stroke: var(--ct-danger); stroke-width: 2; stroke-dasharray: 8 8; }
+      #lat .lbl { font-size: 14px; fill: var(--ct-danger); font-family: Inter, sans-serif; }
+      #lat .ms { margin-top: 8px; font-size: 17px; color: var(--ct-muted); }
+      #lat .ms b { color: var(--ct-ink); }
+      #pacing .big { margin-top: 12px; display: flex; align-items: baseline; gap: 14px; font-size: 18px; color: var(--ct-muted); }
+      #pacing .big b { font-size: 64px; font-weight: 800; color: var(--ct-primary-strong); font-variant-numeric: tabular-nums; }
+      #pacing .rows { margin-top: 10px; }
+      #pacing .rw { display: grid; grid-template-columns: 1fr 190px; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid var(--ct-line); font-size: 16px; }
+      #pacing .rw .mono { font-size: 15px; }
+      #pacing .st { position: relative; height: 30px; }
+      #pacing .st .pill { position: absolute; right: 0; top: 0; white-space: nowrap; }
+
+      /* 9 · infrastructure */
+      #tf { position: absolute; left: 120px; top: 70px; width: 520px; padding: 26px 28px; border-radius: 18px; background: #0d1117; border: 1px solid var(--line); font-size: 17px; line-height: 1.75; color: #cbd5e1; }
+      #tf .h { font-size: 16px; color: var(--muted); margin-bottom: 10px; }
+      #tf .k { color: #c084fc; } #tf .s { color: #86efac; }
+      #tf .ok { color: var(--emerald); margin-top: 8px; }
+      #cloud { position: absolute; left: 720px; top: 60px; width: 1080px; height: 830px; border-radius: 26px; border: 2px dashed rgba(255, 153, 0, 0.55); }
+      #cloud .lab { position: absolute; left: 26px; top: -18px; padding: 2px 14px; background: var(--bg); font-size: 22px; font-weight: 800; color: var(--aws); }
+      .svc { position: absolute; padding: 20px 22px; border-radius: 18px; background: #111827; border: 2px solid rgba(255, 255, 255, 0.12); }
+      .svc b { display: block; font-size: 28px; font-weight: 800; }
+      .svc span { display: block; margin-top: 6px; font-size: 17px; color: var(--muted); line-height: 1.35; }
+      #ec2 { left: 60px; top: 300px; width: 380px; }
+      #ses { left: 560px; top: 70px; width: 440px; }
+      #sns { left: 560px; top: 290px; width: 200px; }
+      #sqs { left: 800px; top: 290px; width: 200px; }
+      #s3 { left: 560px; top: 520px; width: 440px; }
+      #workers { position: absolute; left: 120px; top: 560px; width: 520px; }
+      #wires { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; pointer-events: none; }
+      #wires path { fill: none; stroke: rgba(148, 163, 184, 0.6); stroke-width: 3; }
+
+      /* 10 · outro */
+      #outro { display: flex; flex-direction: column; justify-content: center; padding: 0 160px 90px; }
+      #outro .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin: 34px 0 44px; }
+      #outro .card { padding: 38px 34px; border-radius: 24px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); }
+      #outro .card .v { font-size: 92px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+      #outro .card .k { margin-top: 16px; font-size: 27px; color: var(--muted); line-height: 1.3; }
+      #outro .stack { font-size: 21px; color: var(--muted); }
+      #outro .stack b { color: var(--indigo); font-weight: 600; }
+      #outro .url { margin-top: 36px; font-size: 44px; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="83.1" data-width="1920" data-height="1080">
+      <div id="grid"></div>
+
+      <!-- Narration: one clip per scene. `npm run render:<lang>` copies that
+           language's WAVs (../scripts/narrate.py) into assets/audio/current/. -->
+      <audio id="a-intro" src="assets/audio/current/intro.wav" data-start="0.4" data-duration="5.6"></audio>
+      <audio id="a-problem" src="assets/audio/current/problem.wav" data-start="6.7" data-duration="6.4"></audio>
+      <audio id="a-register" src="assets/audio/current/register.wav" data-start="14.0" data-duration="4.0"></audio>
+      <audio id="a-schedule" src="assets/audio/current/schedule.wav" data-start="20.7" data-duration="8.6"></audio>
+      <audio id="a-diff" src="assets/audio/current/diff.wav" data-start="30.4" data-duration="7.9"></audio>
+      <audio id="a-alert" src="assets/audio/current/alert.wav" data-start="39.5" data-duration="7.1"></audio>
+      <audio id="a-panel" src="assets/audio/current/panel.wav" data-start="47.8" data-duration="5.0"></audio>
+      <audio id="a-ops" src="assets/audio/current/ops.wav" data-start="55.5" data-duration="8.9"></audio>
+      <audio id="a-infra" src="assets/audio/current/infra.wav" data-start="65.6" data-duration="9.9"></audio>
+      <audio id="a-outro" src="assets/audio/current/outro.wav" data-start="76.5" data-duration="4.4"></audio>
+
+      <!-- 1 · intro -->
+      <section id="intro" class="scene clip" data-start="0" data-duration="6.6" data-track-index="0">
+        <div class="tag mono"><b>//</b> <span data-t="introTag"></span></div>
+        <h1 class="grad">CEJTracking</h1>
+        <div class="sub" data-t="introSub"></div>
+        <div class="by mono" data-t="introBy"></div>
+      </section>
+
+      <!-- 2 · today: checking the portal by hand, case by case -->
+      <section id="problem" class="scene clip" data-start="6.3" data-duration="7.6" data-track-index="0">
+        <div id="portal" class="win">
+          <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono">consulta-expedientes · Poder Judicial</span></div>
+          <div class="body">
+            <h3>Consulta de Expedientes Judiciales</h3>
+            <div class="lead" data-t="portalLead"></div>
+            <div class="form">
+              <div class="fld"><label data-t="lblNumber"></label><div class="inp"><span class="val" id="p-num"></span></div></div>
+              <div class="fld"><label data-t="lblParty"></label><div class="inp"><span class="val" id="p-parte"></span></div></div>
+              <div class="btn pri" data-t="btnSearch"></div>
+            </div>
+            <div class="res"><div><span class="spin" id="p-spin"></span><span data-t="portalWait"></span></div></div>
+          </div>
+        </div>
+        <div id="routine">
+          <div class="clock"><b class="mono" id="clock">08:30</b><span data-t="clockNote"></span></div>
+          <div class="days" id="days"></div>
+          <div class="row"><span class="box">✓</span><span class="num mono">00825-2024-0-0401-JP-LA-04</span></div>
+          <div class="row"><span class="box">✓</span><span class="num mono">01567-2023-0-0401-JR-CI-02</span></div>
+          <div class="row"><span class="box">✓</span><span class="num mono">09324-2024-0-0411-JR-FC-01</span></div>
+          <div class="row"><span class="box">✓</span><span class="num mono">03310-2025-0-0412-JP-FC-01</span></div>
+          <div class="row"><span class="box">✓</span><span class="num mono">00412-2025-0-0401-JR-PE-03</span></div>
+          <div class="row"><span class="box">✓</span><span class="num mono">02208-2024-0-0401-JR-LA-01</span></div>
+          <div class="row"><span class="box">✓</span><span class="num mono">00977-2025-0-0412-JR-CI-05</span></div>
+        </div>
+      </section>
+
+      <!-- 3 · register a case once (the real panel behind, the form on top) -->
+      <section id="register" class="scene clip" data-start="13.6" data-duration="7.0" data-track-index="0" data-sub="register">
+        <div id="regwin" class="win shotwin">
+          <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono">cej.pinpontech.com/app/expedientes</span></div>
+          <img class="screen" src="assets/screens/expedientes.png" alt="" />
+          <div class="dim"></div>
+          <div id="modal">
+            <div class="mh">Agregar expediente<span>✕</span></div>
+            <div class="fld"><label>Alias <small>(opcional)</small></label><div class="inp" id="f-alias"><span class="ph">Ej.: Alimentos Rojas</span><span class="val"></span></div><div class="help">Un nombre corto para encontrarlo rápido.</div></div>
+            <div class="fld">
+              <label>Número de expediente</label>
+              <div class="inp mono" id="f-num"><span class="ph">09324-2024-0-0411-JR-FC-01</span><span class="val"></span></div>
+              <div id="segs"></div>
+            </div>
+            <div class="fld">
+              <label>Parte (apellidos o razón social)</label>
+              <div class="inp" id="f-parte" style="font-weight: 600"><span class="ph">ROJAS HUAYAPA</span><span class="val"></span></div>
+              <div class="tip">Ingresar ambos apellidos o la razón social de alguna de las partes, tal como aparecen en las resoluciones del expediente.</div>
+            </div>
+            <div class="fld"><label>Identidad de consulta</label><div class="inp"><span class="val">Estudio Demo · DNI 40•••••21 ▾</span></div></div>
+            <div class="acts"><span class="btn sec">Cancelar</span><span class="btn pri" id="f-submit">Agregar expediente</span></div>
+          </div>
+          <div id="toast">✓ <span data-t="toastAdded"></span> · <b data-t="toastQueued"></b></div>
+          <svg class="cursor" id="cur-reg" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" /></svg>
+        </div>
+        <div class="caption"><span class="n mono">01</span><h2 data-t="hRegister"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 4 · scheduler → queue → worker nodes → automated browser -->
+      <section id="schedule" class="scene clip" data-start="20.3" data-duration="10.0" data-track-index="0" data-sub="schedule">
+        <div id="sched" class="panel">
+          <h4 data-t="schedTitle"></h4>
+          <div class="times mono"><div>10:00</div><div>17:00</div></div>
+          <h4 data-t="queueTitle"></h4>
+          <div id="queue"></div>
+        </div>
+        <div id="nodes" class="panel">
+          <h4 data-t="nodesTitle"></h4>
+          <div class="node" id="n1"><div class="nh"><i></i>nodo-1<span>worker</span></div><div class="cur mono"></div><div class="track"><div class="fill"></div></div></div>
+          <div class="node" id="n2"><div class="nh"><i></i>nodo-2<span>worker</span></div><div class="cur mono"></div><div class="track"><div class="fill"></div></div></div>
+          <div class="node" id="n3"><div class="nh"><i></i>nodo-3<span>worker</span></div><div class="cur mono"></div><div class="track"><div class="fill"></div></div></div>
+          <div id="pace">⏱ <span data-t="pace"></span></div>
+        </div>
+        <div id="browser" class="win">
+          <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono">nodo-1 · Chrome</span></div>
+          <div class="auto mono" data-t="automated"></div>
+          <div class="body">
+            <h5>Consulta de Expedientes Judiciales</h5>
+            <div class="fld"><label data-t="lblNumber"></label><div class="inp"><span class="val" id="b-num"></span></div></div>
+            <div class="fld"><label data-t="lblParty"></label><div class="inp"><span class="val" id="b-parte"></span></div></div>
+            <div class="btn" id="b-go" data-t="btnSearch"></div>
+            <div class="rs" id="b-rs">
+              <div><b>2026-10-08</b><span>RESOLUCIÓN 5 · AUTO ADMISORIO</span></div>
+              <div><b>2026-10-02</b><span>RESOLUCIÓN 4 · DECRETO</span></div>
+              <div><b>2026-09-25</b><span>ESCRITO DE SUBSANACIÓN</span></div>
+              <div><b>2026-09-18</b><span>RESOLUCIÓN 3 · DECRETO</span></div>
+              <div><b>2026-09-04</b><span>RESOLUCIÓN 2 · AUTO</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption"><span class="n mono">02</span><h2 data-t="hSchedule"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 5 · today's result against the stored baseline -->
+      <section id="diff" class="scene clip" data-start="30.0" data-duration="9.4" data-track-index="0" data-sub="diff">
+        <div id="base" class="cmp panel">
+          <h4 data-t="baseTitle"></h4>
+          <div class="sub mono">09324-2024-0-0411-JR-FC-01 · <span data-t="baseWhen"></span></div>
+          <div class="kinds" style="visibility: hidden"><i>·</i></div>
+          <div id="base-acts"></div>
+        </div>
+        <div id="today" class="cmp panel">
+          <h4 data-t="todayTitle"></h4>
+          <div class="sub mono">09324-2024-0-0411-JR-FC-01 · <span data-t="todayWhen"></span></div>
+          <div class="kinds"><i id="k-esc" data-t="kEsc"></i><i id="k-res" data-t="kRes"></i><i id="k-not" data-t="kNot"></i></div>
+          <div id="today-acts"></div>
+          <div id="doc"><span class="fi">PDF</span><div class="nf"><span class="mono">RESOLUCION_5.pdf</span><b><i></i></b></div><em data-t="downloaded"></em></div>
+        </div>
+        <div class="caption"><span class="n mono">03</span><h2 data-t="hDiff"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 6 · the alert: e-mail with the document, WhatsApp on paid plans -->
+      <section id="alert" class="scene clip" data-start="39.1" data-duration="8.6" data-track-index="0" data-sub="alert">
+        <div id="mail" class="win">
+          <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span data-t="mailApp"></span></div>
+          <div class="body">
+            <div class="inbox">
+              <div class="ih" data-t="inbox"></div>
+              <div class="msg" id="m-new"><b>CEJTracking</b><span>Novedad en Alimentos Rojas · 09324…</span></div>
+              <div class="msg"><b>Mesa de partes</b><span>Constancia de presentación de escrito</span></div>
+              <div class="msg"><b>Colegio de Abogados</b><span>Boletín institucional de octubre</span></div>
+              <div class="msg"><b>Cliente · Rojas</b><span>Consulta sobre la audiencia</span></div>
+              <div class="msg"><b>CEJTracking</b><span>Novedad en Desalojo Quispe · 01567-2023…</span></div>
+            </div>
+            <div class="read" id="m-read">
+              <div class="from"><span class="av">CT</span><div><b>CEJTracking</b>alertas · cej.pinpontech.com</div></div>
+              <div class="subj">Novedad en Alimentos Rojas<br /><span class="mono" style="font-size: 20px; font-weight: 400; color: #475569">09324-2024-0-0411-JR-FC-01</span></div>
+              <div class="card">
+                <span class="pill nov">Acto del expediente</span>
+                <div class="t">Resolución 5 — AUTO ADMISORIO — 08/10/2026</div>
+                <div class="s">Sumilla: AUTO QUE ADMITE LA DEMANDA</div>
+              </div>
+              <div class="p">Detectamos esta novedad en la revisión de las 10:00. Adjuntamos el documento publicado en el expediente.</div>
+              <div id="att"><span class="fi">PDF</span><div>RESOLUCION_5.pdf<small>182 KB</small></div></div>
+              <div class="cta"><span class="btn pri">Ver en CEJTracking</span></div>
+            </div>
+          </div>
+        </div>
+        <div id="paid" data-t="paidPlans"></div>
+        <div id="phone">
+          <div class="time">10:04</div>
+          <div class="date" data-t="phoneDate"></div>
+          <div id="wa">
+            <div class="h"><i>✆</i>WhatsApp<span data-t="now"></span></div>
+            <b>CEJTracking</b>
+            Novedad en Alimentos Rojas: Resolución 5 — AUTO ADMISORIO. Detalle en tu panel.
+          </div>
+        </div>
+        <div class="caption"><span class="n mono">04</span><h2 data-t="hAlert"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 7 · the real panel: summary → cases → case timeline -->
+      <section id="panel" class="scene clip" data-start="47.4" data-duration="8.0" data-track-index="0" data-sub="panel">
+        <div id="panelwin" class="win shotwin">
+          <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono" id="panel-url">cej.pinpontech.com/app</span></div>
+          <img class="screen s1" src="assets/screens/resumen.png" alt="" />
+          <img class="screen s2" src="assets/screens/expedientes.png" alt="" />
+          <img class="screen s3" src="assets/screens/detalle.png" alt="" />
+          <svg class="cursor" id="cur-panel" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" /></svg>
+        </div>
+        <div class="caption"><span class="n mono">05</span><h2 data-t="hPanel"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 8 · admin: nodes, portal latency, pacing and retries -->
+      <section id="ops" class="scene clip" data-start="55.1" data-duration="10.4" data-track-index="0" data-sub="ops">
+        <div id="admin" class="win">
+          <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono">cej.pinpontech.com/admin</span></div>
+          <div class="body">
+            <nav>
+              <div class="brand"><i>CT</i><div><b>CEJTracking</b><small>ADMINISTRACIÓN</small></div></div>
+              <div class="it">Panel</div><div class="it">Usuarios</div><div class="it">Planes</div><div class="it">Expedientes</div>
+              <div class="it" id="nav-jobs">Trabajos</div><div class="it on" id="nav-nodes">Nodos</div><div class="it">Correos</div><div class="it">Configuración</div>
+            </nav>
+            <main>
+              <h3>Nodos y trabajos<small>Workers que consultan el portal. Un nodo deshabilitado deja de recibir trabajos.</small></h3>
+              <div id="nodecards">
+                <div class="acard"><h6>nodo-1</h6><b id="nc1">38 trabajos hoy</b><span class="pill ok">Activo</span></div>
+                <div class="acard"><h6>nodo-2</h6><b id="nc2">35 trabajos hoy</b><span class="pill ok">Activo</span></div>
+                <div class="acard"><h6>nodo-3</h6><b id="nc3">41 trabajos hoy</b><span class="pill ok">Activo</span></div>
+              </div>
+              <div class="acard" id="lat">
+                <h6>Tiempo de respuesta del portal</h6>
+                <svg width="600" height="230" viewBox="0 0 600 230">
+                  <line class="th" x1="0" y1="70" x2="600" y2="70" />
+                  <text class="lbl" x="6" y="60">lento</text>
+                  <path id="latpath" class="ln" d="M0 190 L50 186 L100 192 L150 184 L200 180 L250 150 L300 96 L350 52 L400 40 L450 58 L500 110 L550 160 L600 178" />
+                </svg>
+                <div class="ms">Ahora: <b class="mono" id="latnow">1.2 s</b></div>
+              </div>
+              <div class="acard" id="pacing">
+                <h6>Control de ritmo</h6>
+                <div class="big"><b id="conc">3</b>consultas simultáneas</div>
+                <div class="rows">
+                  <div class="rw"><span class="mono">01567-2023-0-0401-JR-CI-02</span><div class="st"><span class="pill ok">Completado</span></div></div>
+                  <div class="rw"><span class="mono">09324-2024-0-0411-JR-FC-01</span><div class="st" id="retry"><span class="pill q r0">En curso</span><span class="pill warn r1" style="opacity: 0">Reintento 1/3 · 2 min</span><span class="pill ok r2" style="opacity: 0">Completado</span></div></div>
+                  <div class="rw"><span class="mono">00825-2024-0-0401-JP-LA-04</span><div class="st"><span class="pill q">En cola</span></div></div>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+        <div class="caption"><span class="n mono">06</span><h2 data-t="hOps"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 9 · infrastructure as code on AWS -->
+      <section id="infra" class="scene clip" data-start="65.2" data-duration="11.2" data-track-index="0" data-sub="infra">
+        <svg id="wires" viewBox="0 0 1920 1080">
+          <path id="w-ec2-ses" /><path id="w-ses-sns" /><path id="w-sns-sqs" /><path id="w-ec2-s3" /><path id="w-wk-ec2" />
+        </svg>
+        <div id="tf" class="mono">
+          <div class="h">infra/terraform/*.tf</div>
+          <div class="l"><span class="k">resource</span> <span class="s">"aws_instance"</span> <span class="s">"panel"</span></div>
+          <div class="l"><span class="k">resource</span> <span class="s">"aws_sesv2_email_identity"</span> <span class="s">"mail"</span></div>
+          <div class="l"><span class="k">resource</span> <span class="s">"aws_sns_topic"</span> <span class="s">"ses_events"</span></div>
+          <div class="l"><span class="k">resource</span> <span class="s">"aws_sqs_queue"</span> <span class="s">"ses_events"</span></div>
+          <div class="l"><span class="k">resource</span> <span class="s">"aws_s3_bucket"</span> <span class="s">"artifacts"</span></div>
+          <div class="l"><span class="k">resource</span> <span class="s">"aws_iam_user_policy"</span> <span class="s">"ses_send"</span></div>
+          <div class="ok" id="tf-ok">$ terraform apply · ✓ Apply complete</div>
+        </div>
+        <div id="workers" class="svc"><b data-t="workersTitle"></b><span data-t="workersSub"></span></div>
+        <div id="cloud">
+          <div class="lab">AWS</div>
+          <div class="svc" id="ec2"><b>EC2</b><span>FastAPI · panel Next.js · PostgreSQL · <span data-t="ec2Sub" style="display: inline; margin: 0"></span></span></div>
+          <div class="svc" id="ses"><b>SES</b><span data-t="sesSub"></span></div>
+          <div class="svc" id="sns"><b>SNS</b><span data-t="snsSub"></span></div>
+          <div class="svc" id="sqs"><b>SQS</b><span data-t="sqsSub"></span></div>
+          <div class="svc" id="s3"><b>S3</b><span data-t="s3Sub"></span></div>
+        </div>
+        <div class="caption"><span class="n mono">07</span><h2 data-t="hInfra"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 10 · outro -->
+      <section id="outro" class="scene clip" data-start="76.1" data-duration="7.0" data-track-index="0">
+        <div class="tag mono"><b>//</b> <span data-t="outroTag"></span></div>
+        <div class="cards">
+          <div class="card"><div class="v grad">80+</div><div class="k" data-t="k1"></div></div>
+          <div class="card"><div class="v grad">794</div><div class="k" data-t="k2"></div></div>
+          <div class="card"><div class="v grad">~44 k</div><div class="k" data-t="k3"></div></div>
+          <div class="card"><div class="v grad">12</div><div class="k" data-t="k4"></div></div>
+        </div>
+        <div class="stack mono"><b>FastAPI</b> · SQLAlchemy 2 · PostgreSQL · <b>Next.js 16</b> · React 19 · Tailwind 4 · <b>Terraform</b> · AWS</div>
+        <div class="url mono grad">cej.pinpontech.com</div>
+      </section>
+
+      <!-- subtitles for the scenes without a caption bar (intro, problem, outro) -->
+      <div id="subs"></div>
+    </div>
+
+    <script>
+      // Copy lives here so one composition renders both languages:
+      //   npx hyperframes render --variables '{"lang":"en"}'
+      // The product UI (panel, alert e-mail) stays in Spanish, as it ships.
+      // SUBS mirrors narration/narration.json in display form ("|" splits a
+      // segment into the lines shown one after another).
+      const COPY = {
+        es: {
+          introTag: 'caso de estudio · SaaS en producción',
+          introSub: 'Vigila los expedientes del Poder Judicial y avisa apenas cambian',
+          introBy: 'Único desarrollador · desde septiembre de 2026',
+          portalLead: 'Ingrese los datos del expediente',
+          lblNumber: 'Número de expediente',
+          lblParty: 'Parte',
+          btnSearch: 'Consultar',
+          portalWait: 'Cargando resultados…',
+          clockNote: 'revisión manual',
+          hRegister: 'Registro único',
+          toastAdded: 'Expediente agregado',
+          toastQueued: 'primera revisión en cola',
+          hSchedule: 'Consulta programada',
+          schedTitle: 'Programador',
+          queueTitle: 'Cola de trabajos',
+          nodesTitle: 'Nodos worker',
+          pace: 'Ritmo controlado: sin saturar el portal',
+          automated: 'automatizado',
+          waiting: 'en cola',
+          hDiff: 'Detecta novedades',
+          baseTitle: 'Línea base guardada',
+          baseWhen: 'ayer 17:00',
+          todayTitle: 'Consulta de hoy',
+          todayWhen: 'hoy 10:00',
+          kEsc: 'Escritos',
+          kRes: 'Resoluciones',
+          kNot: 'Notificaciones',
+          tagNew: 'NUEVO',
+          downloaded: '✓ descargado',
+          hAlert: 'Alerta inmediata',
+          mailApp: 'Correo',
+          inbox: 'Bandeja de entrada',
+          paidPlans: 'Planes pagos',
+          phoneDate: 'jueves, 8 de octubre',
+          now: 'ahora',
+          hPanel: 'Línea de tiempo',
+          hOps: 'Operación estable',
+          hInfra: 'Infraestructura como código',
+          workersTitle: 'Nodos worker',
+          workersSub: 'Fuera de AWS · toman trabajos de la cola',
+          ec2Sub: 'programador',
+          sesSub: 'Envío de alertas por correo',
+          snsSub: 'Rebotes y quejas',
+          sqsSub: 'Cola de eventos',
+          s3Sub: 'Documentos con cifrado en servidor · IAM de mínimo privilegio',
+          outroTag: 'resultados',
+          k1: 'endpoints en la API',
+          k2: 'tests automatizados',
+          k3: 'líneas entre API, panel y workers',
+          k4: 'funcionalidades en 298 commits',
+        },
+        en: {
+          introTag: 'case study · live SaaS',
+          introSub: "Watches Peru's court cases and alerts the moment they change",
+          introBy: 'Sole developer · since September 2026',
+          portalLead: 'Enter the case details',
+          lblNumber: 'Case number',
+          lblParty: 'Party',
+          btnSearch: 'Search',
+          portalWait: 'Loading results…',
+          clockNote: 'manual check',
+          hRegister: 'Register once',
+          toastAdded: 'Case added',
+          toastQueued: 'first check queued',
+          hSchedule: 'Scheduled checks',
+          schedTitle: 'Scheduler',
+          queueTitle: 'Job queue',
+          nodesTitle: 'Worker nodes',
+          pace: "Paced so the portal isn't overloaded",
+          automated: 'automated',
+          waiting: 'queued',
+          hDiff: 'Detects changes',
+          baseTitle: 'Stored baseline',
+          baseWhen: 'yesterday 17:00',
+          todayTitle: "Today's check",
+          todayWhen: 'today 10:00',
+          kEsc: 'Filings',
+          kRes: 'Rulings',
+          kNot: 'Notices',
+          tagNew: 'NEW',
+          downloaded: '✓ downloaded',
+          hAlert: 'Instant alert',
+          mailApp: 'Mail',
+          inbox: 'Inbox',
+          paidPlans: 'Paid plans',
+          phoneDate: 'Thursday, October 8',
+          now: 'now',
+          hPanel: 'Case timeline',
+          hOps: 'Stable operation',
+          hInfra: 'Infrastructure as code',
+          workersTitle: 'Worker nodes',
+          workersSub: 'Outside AWS · claim jobs from the queue',
+          ec2Sub: 'scheduler',
+          sesSub: 'Sends the e-mail alerts',
+          snsSub: 'Bounces and complaints',
+          sqsSub: 'Event queue',
+          s3Sub: 'Documents with server-side encryption · least-privilege IAM',
+          outroTag: 'outcomes',
+          k1: 'API endpoints',
+          k2: 'automated tests',
+          k3: 'lines across API, panel and workers',
+          k4: 'features shipped in 298 commits',
+        },
+      };
+      const SUBS = {
+        es: {
+          intro: 'CEJTracking: un SaaS para estudios de abogados|que vigila sus expedientes judiciales por ellos.',
+          problem: 'Hoy, un abogado revisa el portal del Poder Judicial|expediente por expediente, todos los días,|para no perderse un plazo.',
+          register: 'Basta con registrar cada expediente una vez:|el número y la parte.',
+          schedule: 'Un programador reparte las consultas en una cola,|y workers en nodos separados abren el portal con un navegador automatizado,|a un ritmo que no lo satura.',
+          diff: 'Cada resultado se compara con la línea base guardada:|así detecta escritos, resoluciones y notificaciones nuevas,|y descarga el documento.',
+          alert: 'Apenas hay una novedad, envía un correo con el documento adjunto o enlazado;|en los planes pagos, también por WhatsApp.',
+          panel: 'En el panel, cada expediente tiene su línea de tiempo:|novedades, actuaciones y documentos.',
+          ops: 'Desde administración se ven usuarios, planes, nodos y trabajos;|y si el portal se pone lento,|el control de ritmo y los reintentos mantienen el servicio estable.',
+          infra: 'Corre en AWS, con infraestructura como código en Terraform:|servidores EC2, correo con SES|y documentos cifrados en S3.',
+          outro: 'Más de 80 endpoints y 794 tests,|ya en producción.',
+        },
+        en: {
+          intro: 'CEJTracking: a SaaS for law firms|that watches their court cases for them.',
+          problem: "Today, a lawyer checks the judiciary's portal|case by case, every day,|so as not to miss a deadline.",
+          register: 'Each case is registered just once:|the case number and the party.',
+          schedule: 'A scheduler puts the checks on a queue,|and workers on separate nodes open the portal in an automated browser,|at a pace that doesn\'t overload it.',
+          diff: 'Each result is compared against the stored baseline,|so it spots new filings, rulings and notices,|and downloads the document.',
+          alert: 'As soon as something changes, it emails an alert with the document attached or linked,|and on paid plans, on WhatsApp too.',
+          panel: 'In the panel, every case has its own timeline:|new events, acts and documents.',
+          ops: 'The admin side covers users, plans, nodes and jobs,|and when the portal slows down,|pacing and retries keep the service stable.',
+          infra: 'It runs on AWS, with infrastructure as code in Terraform:|EC2 servers, email through SES,|and encrypted documents in S3.',
+          outro: 'Over 80 endpoints and 794 tests,|live in production.',
+        },
+      };
+      // Clip lengths printed by ../scripts/narrate.py; update after re-synthesizing.
+      const NARRATION_SECONDS = {
+        es: { intro: 5.53, problem: 6.38, register: 3.43, schedule: 8.53, diff: 7.87, alert: 6.36, panel: 4.93, ops: 8.87, infra: 8.17, outro: 4.16 },
+        en: { intro: 4.97, problem: 5.97, register: 3.97, schedule: 8.13, diff: 7.68, alert: 7.10, panel: 4.65, ops: 8.00, infra: 9.81, outro: 4.37 },
+      };
+
+      // Fabricated case data (same invented cases as the panel screenshots).
+      const NEW_CASE = { alias: 'Tenencia Mamani', number: '03310-2025-0-0412-JP-FC-01', parte: 'MAMANI' };
+      const SEGMENT_LABELS = ['Número', 'Año', 'Incidente', 'Distrito', 'Órgano', 'Especialidad', 'Instancia'];
+      const QUEUE = [
+        ['09324-2024-0-0411-JR-FC-01', 'ROJAS'],
+        ['00825-2024-0-0401-JP-LA-04', 'VARGAS'],
+        ['01567-2023-0-0401-JR-CI-02', 'QUISPE'],
+        ['03310-2025-0-0412-JP-FC-01', 'MAMANI'],
+        ['00412-2025-0-0401-JR-PE-03', 'TORRES'],
+        ['02208-2024-0-0401-JR-LA-01', 'SALAZAR'],
+      ];
+      const ACTS = [
+        ['2026-10-02', 'Resolución 4 · DECRETO', 'SE TIENE PRESENTE EL ESCRITO'],
+        ['2026-09-25', 'Escrito', 'ESCRITO DE SUBSANACIÓN'],
+        ['2026-09-18', 'Resolución 3 · DECRETO', 'TRASLADO A LA PARTE DEMANDADA'],
+        ['2026-09-04', 'Resolución 2 · AUTO', 'DECLARA INADMISIBLE LA DEMANDA'],
+      ];
+      const NEW_ACT = ['2026-10-08', 'Resolución 5 · AUTO ADMISORIO', 'AUTO QUE ADMITE LA DEMANDA'];
+
+      const vars = (window.__hyperframes && window.__hyperframes.getVariables()) || {};
+      const lang = vars.lang === 'en' ? 'en' : 'es';
+      const copy = COPY[lang];
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-t]').forEach((el) => { el.textContent = copy[el.dataset.t]; });
+
+      // ---- build repeated markup ------------------------------------------------
+      const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
+      const days = lang === 'es' ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+      days.forEach((d) => document.getElementById('days').appendChild(el('i', '', d)));
+      SEGMENT_LABELS.forEach((l) => document.getElementById('segs').appendChild(el('div', '', `<b>—</b><small>${l}</small>`)));
+      QUEUE.forEach(([n], i) => {
+        const j = el('div', 'job mono', `<span class="c">${n}</span><em data-q>${copy.waiting}</em>`);
+        j.id = `q${i}`;
+        document.getElementById('queue').appendChild(j);
+      });
+      const actRow = ([d, t, s], extra = '') => el('div', 'act', `<span class="d mono">${d}</span><b>${t}</b><span>${s}</span>${extra}`);
+      ACTS.forEach((a) => document.getElementById('base-acts').appendChild(actRow(a)));
+      const newRow = actRow(NEW_ACT, `<span class="newtag">${copy.tagNew}</span>`);
+      newRow.id = 'act-new';
+      document.getElementById('today-acts').appendChild(newRow);
+      ACTS.forEach((a) => document.getElementById('today-acts').appendChild(actRow(a, '<span class="eq">=</span>')));
+
+      // Infra diagram wires, routed between the boxes' edges as laid out.
+      const box = (id) => document.getElementById(id).getBoundingClientRect();
+      const route = (id, d) => document.getElementById(id).setAttribute('d', d);
+      {
+        const ec2 = box('ec2'), ses = box('ses'), sns = box('sns'), sqs = box('sqs'), s3 = box('s3'), wk = box('workers');
+        const curve = (x1, y1, x2, y2) => `M${x1} ${y1} C ${(x1 + x2) / 2} ${y1}, ${(x1 + x2) / 2} ${y2}, ${x2} ${y2}`;
+        const snsX = sns.left + sns.width / 2;
+        route('w-ec2-ses', curve(ec2.right, ec2.top + ec2.height * 0.35, ses.left, ses.top + ses.height / 2));
+        route('w-ses-sns', `M${snsX} ${ses.bottom} L${snsX} ${sns.top}`);
+        route('w-sns-sqs', `M${sns.right} ${sns.top + sns.height / 2} L${sqs.left} ${sqs.top + sqs.height / 2}`);
+        route('w-ec2-s3', curve(ec2.right, ec2.top + ec2.height * 0.65, s3.left, s3.top + s3.height / 2));
+        route('w-wk-ec2', curve(wk.right, wk.top + wk.height / 2, ec2.left, ec2.top + ec2.height / 2));
+      }
+
+      // ---- subtitles -----------------------------------------------------------
+      // Each segment's lines share its narration time in proportion to length.
+      const subtitle = (seg, host, start) => {
+        const lines = SUBS[lang][seg].split('|');
+        const total = NARRATION_SECONDS[lang][seg];
+        const chars = lines.reduce((n, l) => n + l.length, 0);
+        let t = start;
+        return lines.map((text, i) => {
+          const line = el('div', 'sub-line');
+          line.textContent = text;
+          host.appendChild(line);
+          const dur = (total * text.length) / chars;
+          const cue = { el: line, at: t, until: i === lines.length - 1 ? t + dur + 0.5 : t + dur };
+          t += dur;
+          return cue;
+        });
+      };
+
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const ease = 'power3.out';
+      const startOf = (id) => Number(document.getElementById(id).dataset.start);
+      const lengthOf = (id) => Number(document.getElementById(id).dataset.duration);
+
+      const fade = (sel, start, dur, inT = 0.5, outT = 0.5) => {
+        tl.fromTo(sel, { opacity: 0 }, { opacity: 1, duration: inT, ease: 'power1.out' }, start);
+        tl.to(sel, { opacity: 0, duration: outT, ease: 'power1.in' }, start + dur - outT);
+      };
+      const showSubs = (seg, host) => {
+        subtitle(seg, host, startOf(`a-${seg}`)).forEach(({ el: line, at, until }) => {
+          tl.fromTo(line, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power1.out' }, at);
+          tl.to(line, { opacity: 0, duration: 0.2, ease: 'power1.in' }, until - 0.2);
+        });
+      };
+      const freeSubs = document.getElementById('subs');
+      document.querySelectorAll('[data-sub]').forEach((scene) => showSubs(scene.dataset.sub, scene.querySelector('.caption .subs')));
+      ['intro', 'problem', 'outro'].forEach((seg) => showSubs(seg, freeSubs));
+
+      const scene = (id) => {
+        const start = startOf(id);
+        fade(`#${id}`, start, lengthOf(id), 0.4, 0.4);
+        tl.from(`#${id} .caption`, { y: 30, opacity: 0, duration: 0.5, ease }, start + 0.35);
+        return start;
+      };
+      // Types `text` into `node` between `at` and `at + dur`; `onText` sees each prefix.
+      const typeInto = (node, text, at, dur, onText) => {
+        const o = { n: 0 };
+        tl.to(o, {
+          n: text.length, duration: dur, ease: 'none',
+          onUpdate: () => { const s = text.slice(0, Math.round(o.n)); node.textContent = s; if (onText) onText(s); },
+        }, at);
+      };
+      const typeField = (id, text, at, dur, onText) => {
+        const box = document.getElementById(id);
+        tl.set(box, { className: 'inp on' + (box.classList.contains('mono') ? ' mono' : '') }, at - 0.1);
+        typeInto(box.querySelector('.val'), text, at, dur, (s) => { box.querySelector('.ph').style.opacity = s ? 0 : 1; if (onText) onText(s); });
+        tl.set(box, { className: 'inp' + (box.classList.contains('mono') ? ' mono' : '') }, at + dur + 0.15);
+      };
+      const moveCursor = (sel, x, y, at, dur = 0.7) => tl.to(sel, { x, y, duration: dur, ease: 'power2.inOut' }, at);
+      const click = (sel, at) => tl.to(sel, { scale: 0.8, duration: 0.08, yoyo: true, repeat: 1, transformOrigin: '20% 10%' }, at);
+
+      // 1 · intro
+      fade('#intro', 0, lengthOf('intro'), 0.01, 0.4);
+      tl.from('#intro .tag', { y: 20, opacity: 0, duration: 0.6, ease }, 0.2);
+      tl.from('#intro h1', { y: 60, opacity: 0, duration: 0.9, ease }, 0.35);
+      tl.from('#intro .sub', { y: 30, opacity: 0, duration: 0.7, ease }, 0.9);
+      tl.from('#intro .by', { y: 20, opacity: 0, duration: 0.6, ease }, 1.3);
+
+      // 2 · by hand: one case after another, the clock running, every weekday
+      const PR = startOf('problem');
+      fade('#problem', PR, lengthOf('problem'), 0.4, 0.4);
+      tl.from('#portal', { x: -50, opacity: 0, duration: 0.7, ease }, PR);
+      tl.from('#routine', { x: 50, opacity: 0, duration: 0.7, ease }, PR + 0.2);
+      tl.to('#p-spin', { rotation: 360 * 9, duration: 7, ease: 'none' }, PR);
+      const rows = document.querySelectorAll('#routine .row');
+      rows.forEach((row, i) => {
+        const at = PR + 0.9 + i * 0.85;
+        tl.set('#p-num', { textContent: row.querySelector('.num').textContent }, at - 0.4);
+        tl.set('#p-parte', { textContent: QUEUE[i % QUEUE.length][1] }, at - 0.4);
+        tl.to(row.querySelector('.box'), { color: '#0b1220', backgroundColor: '#94a3b8', borderColor: '#94a3b8', duration: 0.15 }, at);
+        tl.to(row.querySelector('.num'), { color: '#64748b', duration: 0.2 }, at);
+      });
+      const clock = { m: 8 * 60 + 30 };
+      tl.to(clock, {
+        m: 11 * 60 + 15, duration: 6.4, ease: 'none',
+        onUpdate: () => {
+          const m = Math.round(clock.m);
+          document.getElementById('clock').textContent = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+        },
+      }, PR + 0.6);
+      document.querySelectorAll('#days i').forEach((d, i) => {
+        tl.to(d, { color: '#0b1220', backgroundColor: '#94a3b8', duration: 0.2 }, PR + 1.0 + i * 1.2);
+        tl.to(d, { color: '#94a3b8', backgroundColor: 'rgba(0,0,0,0)', duration: 0.2 }, PR + 2.1 + i * 1.2);
+      });
+
+      // 3 · register: the form fills in, the case number splits into its parts
+      const R = scene('register');
+      tl.from('#regwin', { y: 40, opacity: 0, duration: 0.6, ease }, R);
+      tl.from('#modal', { y: 30, scale: 0.97, opacity: 0, duration: 0.5, ease }, R + 0.3);
+      tl.set('#cur-reg', { x: 1250, y: 760 }, R);
+      moveCursor('#cur-reg', 620, 200, R + 0.5);
+      typeField('f-alias', NEW_CASE.alias, R + 1.0, 0.8);
+      const segCells = [...document.querySelectorAll('#segs b')];
+      typeField('f-num', NEW_CASE.number, R + 2.0, 1.6, (s) => {
+        const parts = s.split('-');
+        segCells.forEach((c, i) => { c.textContent = parts[i] && (i < parts.length - 1 || s.length === NEW_CASE.number.length) ? parts[i] : '—'; });
+      });
+      moveCursor('#cur-reg', 620, 470, R + 3.3, 0.4);
+      typeField('f-parte', NEW_CASE.parte, R + 3.8, 0.5);
+      moveCursor('#cur-reg', 1050, 700, R + 4.6, 0.6);
+      click('#cur-reg', R + 5.25);
+      tl.to('#f-submit', { backgroundColor: '#032448', duration: 0.1 }, R + 5.25);
+      tl.to('#modal, #regwin .dim', { opacity: 0, duration: 0.3 }, R + 5.5);
+      tl.to('#regwin .screen', { filter: 'blur(0px)', duration: 0.3 }, R + 5.5);
+      tl.fromTo('#toast', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.35, ease }, R + 5.6);
+
+      // 4 · scheduler: jobs leave the queue for the nodes; the browser runs one check
+      const SC = scene('schedule');
+      tl.from('#sched', { x: -40, opacity: 0, duration: 0.6, ease }, SC);
+      tl.from('#nodes', { y: 30, opacity: 0, duration: 0.6, ease }, SC + 0.2);
+      tl.from('#browser', { x: 40, opacity: 0, duration: 0.6, ease }, SC + 0.4);
+      tl.from('#queue .job', { opacity: 0, x: -16, duration: 0.3, stagger: 0.15 }, SC + 0.8);
+      const assign = (qi, node, at, dur) => {
+        const job = document.getElementById(`q${qi}`);
+        tl.set(job.querySelector('[data-q]'), { textContent: `→ ${node}` }, at);
+        tl.to(job, { borderColor: 'rgba(96, 165, 250, 0.7)', backgroundColor: 'rgba(96, 165, 250, 0.1)', duration: 0.2 }, at);
+        tl.set(`#${node} .cur`, { textContent: QUEUE[qi][0] }, at);
+        tl.fromTo(`#${node} .fill`, { scaleX: 0 }, { scaleX: 1, duration: dur, ease: 'power1.inOut', immediateRender: false }, at);
+        tl.set(job.querySelector('[data-q]'), { textContent: '✓' }, at + dur);
+        tl.to(job, { borderColor: 'rgba(52, 211, 153, 0.6)', backgroundColor: 'rgba(52, 211, 153, 0.08)', opacity: 0.6, duration: 0.2 }, at + dur);
+      };
+      assign(0, 'n1', SC + 2.2, 3.4);
+      assign(1, 'n2', SC + 2.6, 2.6);
+      assign(2, 'n3', SC + 3.0, 3.0);
+      assign(3, 'n2', SC + 5.6, 2.8);
+      assign(4, 'n3', SC + 6.4, 2.6);
+      assign(5, 'n1', SC + 6.0, 2.8);
+      typeInto(document.getElementById('b-num'), QUEUE[0][0], SC + 2.4, 1.2);
+      typeInto(document.getElementById('b-parte'), QUEUE[0][1], SC + 3.7, 0.4);
+      tl.to('#b-go', { backgroundColor: '#0f172a', duration: 0.1, yoyo: true, repeat: 1 }, SC + 4.3);
+      tl.from('#b-rs div', { opacity: 0, y: 10, duration: 0.25, stagger: 0.12 }, SC + 4.8);
+      tl.fromTo('#pace', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease }, SC + 7.4);
+
+      // 5 · diff: rows already in the baseline match; the new one lights up
+      const DF = scene('diff');
+      tl.from('#base', { x: -40, opacity: 0, duration: 0.6, ease }, DF);
+      tl.from('#today', { x: 40, opacity: 0, duration: 0.6, ease }, DF + 0.2);
+      tl.from('#base-acts .act', { opacity: 0, y: 10, duration: 0.3, stagger: 0.1 }, DF + 0.6);
+      tl.from('#today-acts .act', { opacity: 0, y: 10, duration: 0.3, stagger: 0.1 }, DF + 1.0);
+      tl.to('#today-acts .eq', { opacity: 1, duration: 0.25, stagger: 0.25 }, DF + 2.0);
+      tl.to('#act-new', { borderColor: 'rgba(251, 191, 36, 0.9)', backgroundColor: 'rgba(251, 191, 36, 0.12)', duration: 0.3 }, DF + 3.2);
+      tl.fromTo('#act-new .newtag', { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.3, ease: 'back.out(2)' }, DF + 3.3);
+      [['#k-esc', 3.9], ['#k-res', 4.5], ['#k-not', 5.2]].forEach(([k, t]) => {
+        tl.to(k, { color: '#1c1917', backgroundColor: '#fbbf24', borderColor: '#fbbf24', duration: 0.2 }, DF + t);
+        if (k !== '#k-res') tl.to(k, { color: '#94a3b8', backgroundColor: 'rgba(0,0,0,0)', borderColor: 'rgba(255,255,255,0.1)', duration: 0.3 }, DF + t + 0.6);
+      });
+      tl.fromTo('#doc', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease }, DF + 5.9);
+      tl.to('#doc .nf b i', { scaleX: 1, duration: 1.1, ease: 'power1.inOut' }, DF + 6.1);
+      tl.to('#doc em', { opacity: 1, duration: 0.3 }, DF + 7.2);
+
+      // 6 · alert: the e-mail lands and opens; WhatsApp on the phone
+      const AL = scene('alert');
+      tl.from('#mail', { x: -40, opacity: 0, duration: 0.6, ease }, AL);
+      tl.from('#m-new', { x: -30, opacity: 0, duration: 0.4, ease }, AL + 0.8);
+      tl.from('#m-read > *', { opacity: 0, y: 12, duration: 0.35, stagger: 0.12 }, AL + 1.3);
+      tl.to('#att', { boxShadow: '0 0 0 4px rgba(14, 165, 164, 0.35)', borderColor: '#0ea5a4', duration: 0.3 }, AL + 3.0);
+      tl.from('#phone', { x: 40, opacity: 0, duration: 0.6, ease }, AL + 0.4);
+      tl.from('#paid', { y: -10, opacity: 0, duration: 0.4, ease }, AL + 4.6);
+      tl.fromTo('#wa', { opacity: 0, y: -40 }, { opacity: 1, y: 0, duration: 0.5, ease: 'back.out(1.4)' }, AL + 4.9);
+
+      // 7 · panel: summary → click "Expedientes" → click "Ver detalle" → timeline
+      const PN = scene('panel');
+      tl.fromTo('#panelwin', { y: 40, scale: 0.985 }, { y: 0, scale: 1, duration: 0.7, ease }, PN);
+      tl.set('#cur-panel', { x: 900, y: 600 }, PN);
+      moveCursor('#cur-panel', 125, 225, PN + 1.1, 0.8);
+      click('#cur-panel', PN + 2.0);
+      tl.set('#panel-url', { textContent: 'cej.pinpontech.com/app/expedientes' }, PN + 2.2);
+      tl.to('#panelwin .s2', { opacity: 1, duration: 0.3 }, PN + 2.2);
+      moveCursor('#cur-panel', 655, 556, PN + 3.0, 0.9);
+      click('#cur-panel', PN + 4.0);
+      tl.set('#panel-url', { textContent: 'cej.pinpontech.com/app/expedientes/detalle' }, PN + 4.2);
+      tl.to('#panelwin .s3', { opacity: 1, duration: 0.3 }, PN + 4.2);
+      tl.to('#cur-panel', { opacity: 0, duration: 0.3 }, PN + 4.6);
+      tl.set('#panelwin', { transformOrigin: '50% 45%' }, PN + 4.6);
+      tl.to('#panelwin', { scale: 1.12, duration: 2.6, ease: 'power2.inOut' }, PN + 4.6);
+
+      // 8 · admin: latency climbs, pacing drops, a check retries and completes
+      const OP = scene('ops');
+      tl.from('#admin', { y: 40, opacity: 0, duration: 0.6, ease }, OP);
+      tl.from('#nodecards .acard', { opacity: 0, y: 14, duration: 0.3, stagger: 0.12 }, OP + 0.6);
+      tl.set('#nav-nodes', { className: 'it' }, OP + 2.4);
+      tl.set('#nav-jobs', { className: 'it on' }, OP + 2.4);
+      const lat = document.getElementById('latpath');
+      const latLen = lat.getTotalLength();
+      tl.fromTo(lat, { strokeDasharray: latLen, strokeDashoffset: latLen }, { strokeDashoffset: 0, duration: 5.6, ease: 'none' }, OP + 3.0);
+      const latMs = { v: 1.2 };
+      tl.to(latMs, { v: 7.8, duration: 2.6, ease: 'power1.in', onUpdate: () => { document.getElementById('latnow').textContent = `${latMs.v.toFixed(1)} s`; } }, OP + 3.6);
+      tl.to(latMs, { v: 1.6, duration: 2.4, ease: 'power1.out', onUpdate: () => { document.getElementById('latnow').textContent = `${latMs.v.toFixed(1)} s`; } }, OP + 6.4);
+      tl.set('#conc', { textContent: '2' }, OP + 5.0);
+      tl.set('#conc', { textContent: '1' }, OP + 5.6);
+      tl.to('#conc', { color: '#dc2626', duration: 0.2 }, OP + 5.0);
+      tl.to('#retry .r0', { opacity: 0, duration: 0.2 }, OP + 5.8);
+      tl.to('#retry .r1', { opacity: 1, duration: 0.2 }, OP + 5.8);
+      tl.to('#retry .r1', { opacity: 0, duration: 0.2 }, OP + 8.2);
+      tl.to('#retry .r2', { opacity: 1, duration: 0.2 }, OP + 8.2);
+      tl.set('#conc', { textContent: '3' }, OP + 8.4);
+      tl.to('#conc', { color: '#032448', duration: 0.3 }, OP + 8.4);
+
+      // 9 · infra: terraform apply, then the services light up as they're named
+      const IN = scene('infra');
+      tl.from('#tf', { x: -40, opacity: 0, duration: 0.6, ease }, IN);
+      tl.from('#tf .l', { opacity: 0, x: -10, duration: 0.25, stagger: 0.3 }, IN + 0.6);
+      tl.from('#tf-ok', { opacity: 0, duration: 0.3 }, IN + 2.8);
+      tl.from('#cloud', { opacity: 0, scale: 0.98, duration: 0.6, ease }, IN + 1.0);
+      const svc = (sel, at, color) => {
+        tl.from(sel, { opacity: 0, y: 16, duration: 0.4, ease }, at);
+        tl.to(sel, { borderColor: color, boxShadow: `0 0 0 6px ${color}33`, duration: 0.3 }, at + 0.2);
+      };
+      const wire = (sel, at) => {
+        const p = document.querySelector(sel);
+        const len = p.getTotalLength();
+        tl.fromTo(p, { strokeDasharray: len, strokeDashoffset: len }, { strokeDashoffset: 0, duration: 0.5, ease: 'power1.inOut' }, at);
+      };
+      svc('#ec2', IN + 4.2, '#ff9900');
+      wire('#w-ec2-ses', IN + 5.2);
+      svc('#ses', IN + 5.5, '#ff9900');
+      wire('#w-ses-sns', IN + 6.0);
+      svc('#sns', IN + 6.2, '#ff9900');
+      wire('#w-sns-sqs', IN + 6.5);
+      svc('#sqs', IN + 6.7, '#ff9900');
+      wire('#w-ec2-s3', IN + 7.2);
+      svc('#s3', IN + 7.5, '#ff9900');
+      svc('#workers', IN + 8.6, '#34d399');
+      wire('#w-wk-ec2', IN + 8.9);
+
+      // 10 · outro
+      const O = startOf('outro');
+      fade('#outro', O, lengthOf('outro'), 0.5, 0.01);
+      tl.from('#outro .tag', { y: 20, opacity: 0, duration: 0.5, ease }, O + 0.2);
+      tl.from('#outro .card', { y: 40, opacity: 0, duration: 0.6, ease, stagger: 0.12 }, O + 0.35);
+      tl.from('#outro .stack', { y: 20, opacity: 0, duration: 0.5, ease }, O + 1.1);
+      tl.from('#outro .url', { y: 20, opacity: 0, duration: 0.5, ease }, O + 1.4);
+
+      window.__timelines['main'] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
