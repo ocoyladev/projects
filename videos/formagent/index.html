@@ -1,0 +1,796 @@
+<!doctype html>
+<html
+  lang="es"
+  data-composition-variables='[{"id":"lang","type":"string","label":"Language (es | en)","default":"es"}]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: Inter; font-weight: 400; src: url(assets/fonts/inter-latin-400-normal.woff2) format('woff2'); }
+      @font-face { font-family: Inter; font-weight: 600; src: url(assets/fonts/inter-latin-600-normal.woff2) format('woff2'); }
+      @font-face { font-family: Inter; font-weight: 800; src: url(assets/fonts/inter-latin-800-normal.woff2) format('woff2'); }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url(assets/fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2'); }
+      @font-face { font-family: 'JetBrains Mono'; font-weight: 600; src: url(assets/fonts/jetbrains-mono-latin-600-normal.woff2) format('woff2'); }
+
+      /* Portfolio palette (dark theme) for the frame; Form Agent's own blue for its UI. */
+      :root {
+        --bg: #07070f;
+        --ink: #f1f5f9;
+        --muted: #94a3b8;
+        --line: rgba(255, 255, 255, 0.1);
+        --blue: #60a5fa;
+        --indigo: #818cf8;
+        --violet: #a78bfa;
+        --emerald: #34d399;
+        --amber: #fbbf24;
+        --red: #f87171;
+        --grad: linear-gradient(135deg, var(--blue) 0%, var(--indigo) 50%, var(--violet) 100%);
+        --fa-blue: #2b5ce6;
+        --fa-green: #2e7d32;
+        --fa-ink: #1f2937;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+      #root {
+        position: relative; width: 100%; height: 100%; overflow: hidden;
+        font-family: Inter, 'DejaVu Sans', sans-serif; color: var(--ink);
+        background:
+          radial-gradient(1200px 700px at 78% 12%, rgba(129, 140, 248, 0.16), transparent 60%),
+          radial-gradient(900px 600px at 10% 95%, rgba(96, 165, 250, 0.12), transparent 60%),
+          var(--bg);
+      }
+      #grid {
+        position: absolute; inset: 0; opacity: 0.35;
+        background-image: radial-gradient(rgba(148, 163, 184, 0.35) 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+      .scene { position: absolute; inset: 0; opacity: 0; }
+      .mono { font-family: 'JetBrains Mono', 'DejaVu Sans Mono', monospace; }
+      .tag { font-size: 26px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+      .tag b { color: var(--blue); font-weight: 600; }
+      .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+      /* Step caption: number + heading + the subtitle of what is being said. */
+      .caption {
+        position: absolute; left: 160px; right: 160px; bottom: 34px; height: 112px; z-index: 5;
+        display: flex; align-items: center; gap: 28px; padding: 0 34px; border-radius: 20px;
+        background: rgba(7, 7, 15, 0.86); border: 1px solid var(--line); backdrop-filter: blur(8px);
+      }
+      .caption .n { font-size: 30px; font-weight: 600; padding: 10px 16px; border-radius: 12px; background: rgba(96, 165, 250, 0.14); color: var(--blue); }
+      .caption h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; }
+      .caption .subs { position: relative; flex: 1; height: 100%; border-left: 1px solid var(--line); padding-left: 28px; }
+      .sub-line {
+        position: absolute; left: 28px; right: 0; top: 50%; transform: translateY(-50%);
+        font-size: 27px; line-height: 1.3; color: #e2e8f0; opacity: 0;
+      }
+      #subs { position: absolute; left: 260px; right: 260px; bottom: 46px; height: 96px; z-index: 6; }
+      #subs .sub-line { left: 0; text-align: center; font-size: 32px; color: var(--ink); text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9); }
+
+      /* Light browser windows. */
+      .win {
+        position: absolute; border-radius: 18px; overflow: hidden; background: #f0f2f5; color: var(--fa-ink);
+        box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--line);
+      }
+      .win .bar {
+        position: absolute; left: 0; right: 0; top: 0; height: 44px; background: #e2e8f0; z-index: 3;
+        display: flex; align-items: center; gap: 10px; padding: 0 18px;
+      }
+      .win .bar i { width: 14px; height: 14px; border-radius: 50%; display: block; }
+      .win .bar .r { background: #f87171; } .win .bar .y { background: #fbbf24; } .win .bar .g { background: #34d399; }
+      .win .bar span { margin-left: 14px; font-size: 17px; color: #475569; }
+      .win .body { position: absolute; left: 0; right: 0; top: 44px; bottom: 0; }
+      .cursor { position: absolute; left: 0; top: 0; width: 30px; height: 30px; z-index: 20; pointer-events: none; }
+
+      /* Wizard screenshots: cropped to the 900 px content column and shown at
+         16/9 scale; `.pan` scrolls the page, overlays live in its coordinates. */
+      .shotwin { left: 160px; top: 54px; width: 1600px; height: 900px; }
+      .pan { position: absolute; left: 0; top: 44px; width: 1600px; }
+      .pan .screen { position: absolute; left: 0; top: 0; width: 1600px; }
+      .pan .screen.next { opacity: 0; }
+      .hl { position: absolute; border-radius: 10px; border: 4px solid var(--amber); box-shadow: 0 0 0 8px rgba(251, 191, 36, 0.25); opacity: 0; }
+      .hl.ok { border-color: #22c55e; box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.25); }
+      .ov { position: absolute; background: #fff; color: #111827; display: flex; align-items: center; }
+
+      /* Mock form controls (the demo target form). */
+      .fld { margin-top: 18px; }
+      .fld label { display: block; font-size: 18px; font-weight: 600; color: #374151; }
+      .inp {
+        position: relative; margin-top: 6px; height: 48px; border: 1px solid #cbd5e1; border-radius: 8px;
+        display: flex; align-items: center; padding: 0 14px; font-size: 19px; background: #fff; color: #111827;
+      }
+      .inp.on { border-color: var(--fa-blue); box-shadow: 0 0 0 3px rgba(59, 110, 245, 0.25); }
+      .inp.bad { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2); }
+      .btn { display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 24px; border-radius: 8px; font-size: 18px; font-weight: 600; background: var(--fa-blue); color: #fff; }
+
+      /* 1 · intro */
+      #intro { display: flex; flex-direction: column; justify-content: center; padding: 0 180px 80px; }
+      #intro h1 { font-size: 200px; font-weight: 800; letter-spacing: -0.045em; line-height: 1; margin: 28px 0 36px; }
+      #intro .sub { font-size: 46px; font-weight: 600; max-width: 1600px; line-height: 1.2; }
+      #intro .by { margin-top: 34px; font-size: 28px; color: var(--muted); }
+
+      /* 2 · by hand */
+      #handform { left: 160px; top: 90px; width: 800px; height: 760px; }
+      #handform .body { padding: 34px 48px; }
+      #handform h3 { font-size: 30px; color: #111827; }
+      #handform .btn { margin-top: 26px; }
+      #sheet { position: absolute; left: 1020px; top: 90px; width: 740px; height: 760px; padding: 30px 32px; border-radius: 22px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); }
+      #sheet .head { display: flex; align-items: baseline; justify-content: space-between; }
+      #sheet .head b { font-size: 22px; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+      #sheet .cnt { font-size: 22px; color: var(--muted); }
+      #sheet .cnt b { font-size: 60px; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; text-transform: none; font-variant-numeric: tabular-nums; }
+      .srow { display: grid; grid-template-columns: 34px 250px 170px 1fr; gap: 12px; align-items: center; height: 58px; padding: 0 14px; margin-top: 10px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.04); font-size: 18px; color: #cbd5e1; }
+      .srow.hd { background: none; border: none; height: 34px; margin-top: 22px; font-size: 16px; color: var(--muted); }
+      .srow .st { font-size: 20px; color: #34d399; opacity: 0; }
+      #sheet .more { margin-top: 16px; font-size: 19px; color: var(--muted); text-align: center; }
+      #typo { position: absolute; left: 48px; top: 600px; padding: 8px 14px; border-radius: 8px; background: #fee2e2; color: #991b1b; font-size: 17px; font-weight: 600; opacity: 0; }
+
+      /* 4 · LLM provider chain */
+      .panel { position: absolute; padding: 28px 30px; border-radius: 22px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); }
+      .panel h4 { font-size: 20px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+      #amb { left: 120px; top: 110px; width: 560px; height: 640px; }
+      #amb pre { margin-top: 22px; padding: 22px; border-radius: 14px; background: #0d1117; font-size: 21px; line-height: 1.7; color: #cbd5e1; white-space: pre-wrap; }
+      #amb pre .k { color: #c084fc; } #amb pre .s { color: #86efac; } #amb pre .c { color: #64748b; }
+      #amb .q { margin-top: 22px; display: grid; gap: 12px; }
+      #amb .q div { padding: 14px 18px; border-radius: 12px; font-size: 22px; color: #fde68a; background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.35); }
+      #chain { left: 720px; top: 110px; width: 500px; height: 640px; }
+      .prov { position: relative; display: flex; align-items: center; gap: 16px; height: 104px; padding: 0 22px; margin-top: 26px; border-radius: 16px; background: rgba(255, 255, 255, 0.05); border: 2px solid var(--line); }
+      .prov .ix { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 18px; font-weight: 800; color: var(--muted); border: 2px solid var(--line); }
+      .prov b { font-size: 26px; font-weight: 600; flex: 1; }
+      .prov .st { font-size: 17px; font-weight: 600; color: var(--muted); }
+      .prov + .prov::before { content: '↓'; position: absolute; left: 40px; top: -30px; font-size: 22px; color: var(--muted); }
+      #answer { left: 1260px; top: 110px; width: 540px; height: 640px; }
+      #answer pre { margin-top: 22px; padding: 22px; border-radius: 14px; background: #0d1117; font-size: 21px; line-height: 1.75; color: #cbd5e1; }
+      #answer pre .k { color: #93c5fd; } #answer pre .s { color: #86efac; } #answer pre .n { color: #fca5a5; }
+      #answer .via { margin-top: 22px; font-size: 22px; color: var(--emerald); }
+
+      /* 3 · data source kinds */
+      #kinds { position: absolute; right: 190px; top: 128px; z-index: 4; display: flex; gap: 10px; padding: 12px; border-radius: 16px; background: rgba(7, 7, 15, 0.86); border: 1px solid var(--line); }
+      #kinds i { font-style: normal; padding: 8px 16px; border-radius: 10px; font-size: 20px; font-weight: 600; color: var(--muted); border: 1px solid var(--line); }
+
+      /* 8 · bulk run */
+      #runq { left: 120px; top: 70px; width: 720px; height: 820px; }
+      .rrow { display: grid; grid-template-columns: 44px 1fr 200px; gap: 12px; align-items: center; height: 92px; padding: 0 18px; margin-top: 14px; border-radius: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); }
+      .rrow .i { font-size: 22px; font-weight: 800; color: var(--muted); }
+      .rrow .who { font-size: 19px; color: #e2e8f0; }
+      .rrow .who small { display: block; margin-top: 4px; font-size: 15px; color: var(--muted); }
+      .rrow .rs { position: relative; height: 34px; }
+      .rrow .rs span { position: absolute; right: 0; top: 0; padding: 5px 12px; border-radius: 8px; font-size: 16px; font-weight: 600; white-space: nowrap; }
+      .rrow .rs .w { color: var(--muted); border: 1px solid var(--line); }
+      .rrow .rs .go { color: #bfdbfe; background: rgba(59, 110, 245, 0.25); opacity: 0; }
+      .rrow .rs .ok { color: #bbf7d0; background: rgba(34, 197, 94, 0.2); opacity: 0; }
+      #target { left: 900px; top: 70px; width: 900px; height: 820px; }
+      #target .body { padding: 26px 40px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; align-content: start; }
+      #target .full { grid-column: span 2; }
+      #target .fld { margin-top: 14px; }
+      #target .inp { height: 46px; font-size: 18px; }
+      #target .opts { margin-top: 10px; display: flex; gap: 18px; font-size: 18px; color: #374151; }
+      #target .opts span::before { content: '○ '; color: #94a3b8; }
+      #target .opts span.on::before { content: '● '; color: var(--fa-blue); }
+      #target .chk { margin-top: 16px; font-size: 18px; color: #374151; }
+      #target .chk b { display: inline-block; width: 22px; height: 22px; margin-right: 10px; vertical-align: -4px; border-radius: 5px; border: 2px solid #94a3b8; font-size: 15px; line-height: 18px; text-align: center; color: #fff; }
+      #target .btn { margin-top: 18px; justify-self: start; }
+      #session { position: absolute; right: 16px; top: 8px; z-index: 4; padding: 4px 12px; border-radius: 8px; font-size: 15px; font-weight: 600; background: #312e81; color: #e0e7ff; }
+      #sent { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; display: grid; place-items: center; font-size: 20px; font-weight: 600; color: #166534; background: #dcfce7; opacity: 0; }
+
+      /* 9 · results */
+      #reswin { left: 120px; top: 70px; width: 1000px; height: 760px; }
+      #reswin .screen { position: absolute; left: 0; top: 44px; width: 1000px; }
+      #json { left: 1180px; top: 70px; width: 620px; height: 760px; }
+      #json pre { margin-top: 18px; font-size: 18px; line-height: 1.62; color: #cbd5e1; }
+      #json pre div { opacity: 0; }
+      #json pre .k { color: #93c5fd; } #json pre .s { color: #86efac; } #json pre .n { color: #fca5a5; }
+
+      /* 10 · outro */
+      #outro { display: flex; flex-direction: column; justify-content: center; padding: 0 160px 90px; }
+      #outro .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin: 34px 0 44px; }
+      #outro .card { padding: 38px 34px; border-radius: 24px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); }
+      #outro .card .v { white-space: nowrap; font-size: 84px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+      #outro .card .k { margin-top: 16px; font-size: 27px; color: var(--muted); line-height: 1.3; }
+      #outro .stack { font-size: 21px; color: var(--muted); }
+      #outro .stack b { color: var(--indigo); font-weight: 600; }
+      #outro .url { margin-top: 36px; font-size: 44px; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="74.5" data-width="1920" data-height="1080">
+      <div id="grid"></div>
+
+      <!-- Narration: one clip per scene. `npm run render:<lang>` copies that
+           language's WAVs (../scripts/narrate.py) into assets/audio/current/. -->
+      <audio id="a-intro" src="assets/audio/current/intro.wav" data-start="0.4" data-duration="7.7"></audio>
+      <audio id="a-problem" src="assets/audio/current/problem.wav" data-start="8.7" data-duration="4.8"></audio>
+      <audio id="a-analyze" src="assets/audio/current/analyze.wav" data-start="14.8" data-duration="9.1"></audio>
+      <audio id="a-llm" src="assets/audio/current/llm.wav" data-start="24.9" data-duration="6.2"></audio>
+      <audio id="a-source" src="assets/audio/current/source.wav" data-start="32.0" data-duration="7.1"></audio>
+      <audio id="a-mapping" src="assets/audio/current/mapping.wav" data-start="39.9" data-duration="5.0"></audio>
+      <audio id="a-rowtest" src="assets/audio/current/rowtest.wav" data-start="46.6" data-duration="2.9"></audio>
+      <audio id="a-run" src="assets/audio/current/run.wav" data-start="51.7" data-duration="6.4"></audio>
+      <audio id="a-results" src="assets/audio/current/results.wav" data-start="59.8" data-duration="3.4"></audio>
+      <audio id="a-outro" src="assets/audio/current/outro.wav" data-start="65.1" data-duration="8.5"></audio>
+
+      <!-- 1 · intro -->
+      <section id="intro" class="scene clip" data-start="0" data-duration="8.6" data-track-index="0">
+        <div class="tag mono"><b>//</b> <span data-t="introTag"></span></div>
+        <h1 class="grad">Form Agent</h1>
+        <div class="sub" data-t="introSub"></div>
+        <div class="by mono">RPA · Python · FastAPI · Playwright · Selenium</div>
+      </section>
+
+      <!-- 2 · today: one record after another, typed by hand -->
+      <section id="problem" class="scene clip" data-start="8.3" data-duration="6.4" data-track-index="0">
+        <div id="handform" class="win">
+          <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono">forms.example.com/signup</span></div>
+          <div class="body">
+            <h3>Sign up</h3>
+            <div class="fld"><label>Email</label><div class="inp" id="h-email"><span class="val"></span></div></div>
+            <div class="fld"><label>Full Name</label><div class="inp" id="h-name"><span class="val"></span></div></div>
+            <div class="fld"><label>Country</label><div class="inp" id="h-country"><span class="val"></span></div></div>
+            <div class="fld"><label>Plan</label><div class="inp" id="h-plan"><span class="val"></span></div></div>
+            <div class="btn">Submit</div>
+            <div id="typo" data-t="typo"></div>
+          </div>
+        </div>
+        <div id="sheet">
+          <div class="head"><b>leads.csv</b><span class="cnt"><b class="mono" id="cnt">0</b> / 500</span></div>
+          <div class="srow hd mono"><span></span><span>correo</span><span>nombre</span><span>pais · plan</span></div>
+          <div id="sheet-rows"></div>
+          <div class="more" data-t="moreRows"></div>
+        </div>
+      </section>
+
+      <!-- 3 · analyze: paste the URL, the agent describes every field (real wizard) -->
+      <section id="analyze" class="scene clip" data-start="14.4" data-duration="10.4" data-track-index="0" data-sub="analyze">
+        <div id="anwin" class="win shotwin">
+          <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono">localhost:8082 · Form Agent</span></div>
+          <div class="pan" id="an-pan">
+            <img class="screen" src="assets/screens/start.png" alt="" />
+            <img class="screen next" src="assets/screens/summary.png" alt="" />
+            <div class="ov" id="an-url" style="left: 88px; top: 554px; width: 1424px; height: 64px; padding-left: 19px; font-size: 28px"><span class="val"></span></div>
+            <div class="hl" id="hl-type"></div>
+            <div class="hl" id="hl-sel"></div>
+            <div class="hl" id="hl-lbl"></div>
+            <div class="hl" id="hl-opt"></div>
+            <div class="hl" id="hl-req"></div>
+          </div>
+          <svg class="cursor" id="cur-an" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" /></svg>
+        </div>
+        <div class="caption"><span class="n mono">01</span><h2 data-t="hAnalyze"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 4 · an ambiguous field goes down the LLM provider chain -->
+      <section id="llm" class="scene clip" data-start="24.5" data-duration="7.4" data-track-index="0" data-sub="llm">
+        <div id="amb" class="panel">
+          <h4 data-t="ambTitle"></h4>
+<pre class="mono"><span class="c">&lt;!-- form.html --&gt;</span>
+&lt;<span class="k">span</span>&gt;Fecha de inicio&lt;/<span class="k">span</span>&gt;
+&lt;<span class="k">input</span> <span class="k">id</span>=<span class="s">"f_17"</span>
+       <span class="k">type</span>=<span class="s">"text"</span>
+       <span class="k">placeholder</span>=<span class="s">"dd/mm/aaaa"</span>&gt;</pre>
+          <div class="q"><div data-t="q1"></div><div data-t="q2"></div></div>
+        </div>
+        <div id="chain" class="panel">
+          <h4 data-t="chainTitle"></h4>
+          <div class="prov" id="p1"><span class="ix">1</span><b>Claude Code</b><span class="st"></span></div>
+          <div class="prov" id="p2"><span class="ix">2</span><b>OpenRouter</b><span class="st"></span></div>
+          <div class="prov" id="p3"><span class="ix">3</span><b>Gemini</b><span class="st"></span></div>
+          <div class="prov" id="p4"><span class="ix">4</span><b>OpenAI</b><span class="st"></span></div>
+        </div>
+        <div id="answer" class="panel">
+          <h4 data-t="answerTitle"></h4>
+<pre class="mono">{
+  <span class="k">"name"</span>: <span class="s">"start_date"</span>,
+  <span class="k">"type"</span>: <span class="s">"date"</span>,
+  <span class="k">"label"</span>: <span class="s">"Fecha de inicio"</span>,
+  <span class="k">"selector"</span>: <span class="s">"#f_17"</span>,
+  <span class="k">"required"</span>: <span class="n">false</span>
+}</pre>
+          <div class="via" data-t="via"></div>
+        </div>
+        <div class="caption"><span class="n mono">02</span><h2 data-t="hLlm"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 5 · data source: upload, inspect, pick the table (real wizard) -->
+      <section id="source" class="scene clip" data-start="31.6" data-duration="8.2" data-track-index="0" data-sub="source">
+        <div id="srcwin" class="win shotwin">
+          <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono">localhost:8082 · Form Agent</span></div>
+          <div class="pan" id="src-pan">
+            <img class="screen" src="assets/screens/datasource.png" alt="" />
+            <img class="screen next" src="assets/screens/inspected.png" alt="" />
+            <div class="ov mono" id="src-file" style="left: 245px; top: 740px; width: 180px; height: 36px; font-family: 'DejaVu Sans', sans-serif; font-size: 23px; opacity: 0">leads.csv</div>
+            <div class="hl ok" id="hl-table"></div>
+          </div>
+          <svg class="cursor" id="cur-src" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" /></svg>
+        </div>
+        <div id="kinds"><i>CSV</i><i>Excel</i><i>SQLite</i><i>PostgreSQL</i><i>MySQL</i></div>
+        <div class="caption"><span class="n mono">03</span><h2 data-t="hSource"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 6 · mapping: columns fill in, a constant, an attachment (real wizard) -->
+      <section id="mapping" class="scene clip" data-start="39.5" data-duration="7.0" data-track-index="0" data-sub="mapping">
+        <div id="mapwin" class="win shotwin">
+          <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono">localhost:8082 · Form Agent</span></div>
+          <div class="pan" id="map-pan">
+            <img class="screen" src="assets/screens/mapping.png" alt="" />
+            <img class="screen" id="map-done" src="assets/screens/mapped.png" alt="" />
+            <div class="hl" id="hl-cols"></div>
+            <div class="hl" id="hl-const"></div>
+            <div class="hl" id="hl-att"></div>
+          </div>
+        </div>
+        <div class="caption"><span class="n mono">04</span><h2 data-t="hMapping"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 7 · one row end to end before the batch (real wizard) -->
+      <section id="rowtest" class="scene clip" data-start="46.2" data-duration="5.4" data-track-index="0" data-sub="rowtest">
+        <div id="rtwin" class="win shotwin">
+          <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono">localhost:8082 · Form Agent</span></div>
+          <div class="pan" id="rt-pan">
+            <img class="screen" src="assets/screens/preview.png" alt="" />
+            <img class="screen next" src="assets/screens/tested.png" alt="" />
+            <div class="hl ok" id="hl-ok"></div>
+          </div>
+          <svg class="cursor" id="cur-rt" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" /></svg>
+        </div>
+        <div class="caption"><span class="n mono">05</span><h2 data-t="hRowtest"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 8 · the batch: one browser session per row -->
+      <section id="run" class="scene clip" data-start="51.3" data-duration="8.4" data-track-index="0" data-sub="run">
+        <div id="runq" class="panel">
+          <h4 data-t="runTitle"></h4>
+          <div id="run-rows"></div>
+        </div>
+        <div id="target" class="win">
+          <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono">forms.example.com/signup</span></div>
+          <div id="session" class="mono"></div>
+          <div class="body">
+            <div class="fld full"><label>Email</label><div class="inp mono" id="t-email"><span class="val"></span></div></div>
+            <div class="fld"><label>Full Name</label><div class="inp" id="t-name"><span class="val"></span></div></div>
+            <div class="fld"><label>Country</label><div class="inp" id="t-country"><span class="val"></span></div></div>
+            <div class="fld"><label>Plan</label><div class="opts" id="t-plan"><span data-v="basic">basic</span><span data-v="pro">pro</span><span data-v="enterprise">enterprise</span></div></div>
+            <div class="fld"><label>Date</label><div class="inp mono" id="t-date"><span class="val"></span></div></div>
+            <div class="fld full"><label>Bio</label><div class="inp" id="t-bio"><span class="val"></span></div></div>
+            <div class="fld"><label>CV (.pdf)</label><div class="inp mono" id="t-cv" style="font-size: 16px"><span class="val"></span></div></div>
+            <div class="chk full" id="t-tos"><b></b>I accept the Terms of Service</div>
+            <div class="btn" id="t-go">Submit</div>
+          </div>
+          <div id="sent">✓ <span data-t="sent"></span></div>
+        </div>
+        <div class="caption"><span class="n mono">06</span><h2 data-t="hRun"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 9 · results table + batch_result.json -->
+      <section id="results" class="scene clip" data-start="59.4" data-duration="5.6" data-track-index="0" data-sub="results">
+        <div id="reswin" class="win">
+          <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono">localhost:8082 · Form Agent</span></div>
+          <img class="screen" src="assets/screens/results.png" alt="" />
+        </div>
+        <div id="json" class="panel">
+          <h4 class="mono" style="text-transform: none; letter-spacing: 0">runs/…/batch_result.json</h4>
+          <pre class="mono" id="json-lines"></pre>
+        </div>
+        <div class="caption"><span class="n mono">07</span><h2 data-t="hResults"></h2><div class="subs"></div></div>
+      </section>
+
+      <!-- 10 · outro -->
+      <section id="outro" class="scene clip" data-start="64.7" data-duration="9.8" data-track-index="0">
+        <div class="tag mono"><b>//</b> <span data-t="outroTag"></span></div>
+        <div class="cards">
+          <div class="card"><div class="v grad">8</div><div class="k" data-t="k1"></div></div>
+          <div class="card"><div class="v grad" data-t="v2"></div><div class="k" data-t="k2"></div></div>
+          <div class="card"><div class="v grad">313</div><div class="k" data-t="k3"></div></div>
+          <div class="card"><div class="v grad" data-t="v4"></div><div class="k" data-t="k4"></div></div>
+        </div>
+        <div class="stack mono"><b>Python</b> · <b>FastAPI</b> · Playwright · Selenium · pandas · SQLAlchemy · <b>LLM</b> · pytest</div>
+        <div class="url mono grad">Docker Compose · Windows .exe</div>
+      </section>
+
+      <!-- subtitles for the scenes without a caption bar (intro, problem, outro) -->
+      <div id="subs"></div>
+    </div>
+
+    <script>
+      // Copy lives here so one composition renders both languages:
+      //   npx hyperframes render --variables '{"lang":"en"}'
+      // The wizard and the demo form stay as they ship (English UI).
+      // SUBS mirrors narration/narration.json in display form ("|" splits a
+      // segment into the lines shown one after another).
+      const COPY = {
+        es: {
+          introTag: 'caso de estudio · en desarrollo',
+          introSub: 'Llena formularios web en lote desde un CSV, un Excel o una base SQL',
+          typo: '✗ Email inválido: hay que volver a escribirlo',
+          moreRows: '… y 494 filas más',
+          hAnalyze: 'Analiza el formulario',
+          ambTitle: 'Campo ambiguo',
+          q1: '¿Es texto o una fecha?',
+          q2: '¿Qué etiqueta le corresponde?',
+          chainTitle: 'Cadena de proveedores',
+          answerTitle: 'Campo resuelto',
+          via: '✓ resuelto por el proveedor 3',
+          skipped: 'no disponible · se omite',
+          failed: 'error · siguiente',
+          answered: '✓ responde',
+          idle: 'en reserva',
+          hLlm: 'IA con respaldo',
+          hSource: 'Fuente de datos',
+          hMapping: 'Mapeo de campos',
+          hRowtest: 'Prueba de una fila',
+          runTitle: 'Ejecución en lote',
+          waiting: 'en espera',
+          running: 'sesión nueva…',
+          session: 'sesión',
+          sent: 'Formulario enviado',
+          hRun: 'Una sesión por fila',
+          hResults: 'Resultados',
+          outroTag: 'resultados · en desarrollo',
+          k1: 'pasos en el asistente',
+          v2: '~14,8 k',
+          k2: 'líneas de código',
+          k3: 'tests automatizados',
+          v4: '~0,85 s',
+          k4: 'por fila en la demo',
+        },
+        en: {
+          introTag: 'case study · in development',
+          introSub: 'Fills in web forms in bulk from a CSV, an Excel file or a SQL database',
+          typo: '✗ Invalid email: type it again',
+          moreRows: '… and 494 more rows',
+          hAnalyze: 'Analyzes the form',
+          ambTitle: 'Ambiguous field',
+          q1: 'Is it text or a date?',
+          q2: 'Which label goes with it?',
+          chainTitle: 'Provider chain',
+          answerTitle: 'Resolved field',
+          via: '✓ resolved by provider 3',
+          skipped: 'unavailable · skipped',
+          failed: 'error · next',
+          answered: '✓ answers',
+          idle: 'standing by',
+          hLlm: 'AI with fallback',
+          hSource: 'Data source',
+          hMapping: 'Field mapping',
+          hRowtest: 'Single-row test',
+          runTitle: 'Bulk run',
+          waiting: 'waiting',
+          running: 'new session…',
+          session: 'session',
+          sent: 'Form submitted',
+          hRun: 'One session per row',
+          hResults: 'Results',
+          outroTag: 'outcomes · in development',
+          k1: 'wizard steps',
+          v2: '~14.8 k',
+          k2: 'lines of code',
+          k3: 'automated tests',
+          v4: '~0.85 s',
+          k4: 'per row in the demo',
+        },
+      };
+      const SUBS = {
+        es: {
+          intro: 'Form Agent: un RPA que llena formularios web en lote,|a partir de un CSV, un Excel o una base de datos.',
+          problem: 'Cargar cientos de registros a mano en un formulario web|es lento, y propenso a errores.',
+          analyze: 'Se pega la dirección del formulario,|y el agente abre un navegador real para describir cada campo:|tipo, selector, etiqueta, opciones, y si es obligatorio.',
+          llm: 'Si un campo es ambiguo, consulta una cadena de modelos de lenguaje,|con respaldo entre proveedores.',
+          source: 'Luego inspecciona la fuente de datos:|CSV, Excel, SQLite, o una base PostgreSQL o MySQL.',
+          mapping: 'El mapeo asigna una columna a cada campo,|y admite constantes y adjuntos.',
+          rowtest: 'Antes del lote, prueba una sola fila de punta a punta.',
+          run: 'Después ejecuta el lote: cada fila en su propia sesión de navegador,|con tiempos, y capturas si algo falla.',
+          results: 'Al final, deja un resumen por fila, y un registro en JSON.',
+          outro: 'Unas 14.800 líneas y 313 tests.|Corre en local, con Docker Compose o como ejecutable de Windows.',
+        },
+        en: {
+          intro: 'Form Agent: an RPA tool that fills in web forms in bulk,|from a CSV file, an Excel sheet or a database.',
+          problem: 'Typing hundreds of records into a web form by hand|is slow, and error-prone.',
+          analyze: "You paste the form's address,|and the agent opens a real browser to describe every field:|type, selector, label, options, and whether it's required.",
+          llm: 'When a field is ambiguous, it asks a chain of language models,|falling back from one provider to the next.',
+          source: 'Then it inspects the data source:|CSV, Excel, SQLite, or a PostgreSQL or MySQL database.',
+          mapping: 'The mapping assigns a column to each field,|and supports constants and file attachments.',
+          rowtest: 'Before the batch, it tests a single row end to end.',
+          run: 'Then it runs the batch: each row in its own browser session,|with timings, and screenshots if anything fails.',
+          results: 'At the end, it leaves a per-row summary, and a JSON log.',
+          outro: 'About 14,800 lines and 313 tests.|It runs locally, with Docker Compose or as a Windows executable.',
+        },
+      };
+      // Clip lengths printed by ../scripts/narrate.py; update after re-synthesizing.
+      const NARRATION_SECONDS = {
+        es: { intro: 5.93, problem: 4.80, analyze: 8.47, llm: 5.25, source: 5.70, mapping: 4.16, rowtest: 2.86, run: 5.72, results: 3.24, outro: 6.91 },
+        en: { intro: 7.68, problem: 4.39, analyze: 9.09, llm: 6.17, source: 7.04, mapping: 4.93, rowtest: 2.86, run: 6.40, results: 3.37, outro: 8.49 },
+      };
+
+      // Fabricated rows: the same leads.csv the wizard screenshots were taken with
+      // (row 0 and the per-row timings come from those screenshots).
+      const LEADS = [
+        { email: 'ana.torres@demo.pe', name: 'Ana Torres', country: 'Peru', plan: 'pro', date: '2026-10-01', bio: 'Analista de datos', ms: 833 },
+        { email: 'luis.ramos@demo.pe', name: 'Luis Ramos', country: 'Peru', plan: 'basic', date: '2026-10-02', bio: 'Contador', ms: 824 },
+        { email: 'carla.medina@demo.pe', name: 'Carla Medina', country: 'United States', plan: 'enterprise', date: '2026-10-03', bio: 'Gerente de operaciones', ms: 861 },
+        { email: 'jorge.salas@demo.pe', name: 'Jorge Salas', country: 'Peru', plan: 'pro', date: '2026-10-04', bio: 'Desarrollador', ms: 849 },
+        { email: 'rosa.vega@demo.pe', name: 'Rosa Vega', country: 'Peru', plan: 'basic', date: '2026-10-05', bio: 'Diseñadora', ms: 839 },
+        { email: 'diego.paredes@demo.pe', name: 'Diego Paredes', country: 'United States', plan: 'pro', date: '2026-10-06', bio: 'Abogado', ms: 864 },
+      ];
+      const FORM_URL = 'https://forms.example.com/signup';
+      const CV_FILE = 'rut-muestra.pdf';
+
+      // Screenshots are the wizard's 900 px content column shown 1600 px wide.
+      const K = 16 / 9;
+      const BAR = 44;
+      // Places `node` over a crop-space rectangle (page coordinates of the cropped capture).
+      const place = (id, x, y, w, h) => Object.assign(document.getElementById(id).style, {
+        left: `${x * K - 8}px`, top: `${y * K - 8}px`, width: `${w * K + 16}px`, height: `${h * K + 16}px`,
+      });
+
+      const vars = (window.__hyperframes && window.__hyperframes.getVariables()) || {};
+      const lang = vars.lang === 'en' ? 'en' : 'es';
+      const copy = COPY[lang];
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-t]').forEach((el) => { el.textContent = copy[el.dataset.t]; });
+
+      // ---- build repeated markup ------------------------------------------------
+      const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
+      LEADS.forEach((r, i) => {
+        const row = el('div', 'srow mono', `<span class="st">✓</span><span>${r.email}</span><span>${r.name}</span><span>${r.country} · ${r.plan}</span>`);
+        row.id = `s${i}`;
+        document.getElementById('sheet-rows').appendChild(row);
+        const rr = el('div', 'rrow', `<span class="i mono">${i}</span><div class="who mono">${r.email}<small>${r.name} · ${r.country} · ${r.plan}</small></div>`
+          + `<div class="rs mono"><span class="w">${copy.waiting}</span><span class="go">${copy.running}</span><span class="ok">OK · ${r.ms} ms</span></div>`);
+        rr.id = `r${i}`;
+        document.getElementById('run-rows').appendChild(rr);
+      });
+      {
+        // Same shape as RowResult.model_dump() in form_agent/execution.py.
+        const lines = ['['];
+        LEADS.forEach((r, i) => {
+          lines.push(`  { <span class="k">"index"</span>: <span class="n">${i}</span>, <span class="k">"status"</span>: <span class="s">"ok"</span>,`);
+          lines.push(`    <span class="k">"duration_ms"</span>: <span class="n">${r.ms}</span>, <span class="k">"screenshot"</span>: <span class="n">null</span> }${i < LEADS.length - 1 ? ',' : ''}`);
+        });
+        lines.push(']');
+        document.getElementById('json-lines').innerHTML = lines.map((l) => `<div>${l}</div>`).join('');
+      }
+      // Highlight boxes, in crop coordinates of the captures.
+      place('hl-type', 465, 375, 88, 330);
+      place('hl-sel', 553, 375, 130, 330);
+      place('hl-lbl', 249, 375, 106, 330);
+      place('hl-opt', 740, 375, 112, 330);
+      place('hl-req', 683, 375, 57, 330);
+      place('hl-table', 48, 652, 804, 113);
+      place('hl-cols', 445, 395, 142, 392);
+      place('hl-const', 606, 629, 235, 37);
+      place('hl-att', 48, 840, 804, 107);
+      place('hl-ok', 48, 566, 804, 42);
+
+      // ---- subtitles -----------------------------------------------------------
+      // Each segment's lines share its narration time in proportion to length.
+      const subtitle = (seg, host, start) => {
+        const lines = SUBS[lang][seg].split('|');
+        const total = NARRATION_SECONDS[lang][seg];
+        const chars = lines.reduce((n, l) => n + l.length, 0);
+        let t = start;
+        return lines.map((text, i) => {
+          const line = el('div', 'sub-line');
+          line.textContent = text;
+          host.appendChild(line);
+          const dur = (total * text.length) / chars;
+          const cue = { el: line, at: t, until: i === lines.length - 1 ? t + dur + 0.5 : t + dur };
+          t += dur;
+          return cue;
+        });
+      };
+
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const ease = 'power3.out';
+      const startOf = (id) => Number(document.getElementById(id).dataset.start);
+      const lengthOf = (id) => Number(document.getElementById(id).dataset.duration);
+
+      const fade = (sel, start, dur, inT = 0.5, outT = 0.5) => {
+        tl.fromTo(sel, { opacity: 0 }, { opacity: 1, duration: inT, ease: 'power1.out' }, start);
+        tl.to(sel, { opacity: 0, duration: outT, ease: 'power1.in' }, start + dur - outT);
+      };
+      const showSubs = (seg, host) => {
+        subtitle(seg, host, startOf(`a-${seg}`)).forEach(({ el: line, at, until }) => {
+          tl.fromTo(line, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power1.out' }, at);
+          tl.to(line, { opacity: 0, duration: 0.2, ease: 'power1.in' }, until - 0.2);
+        });
+      };
+      const freeSubs = document.getElementById('subs');
+      document.querySelectorAll('[data-sub]').forEach((scene) => showSubs(scene.dataset.sub, scene.querySelector('.caption .subs')));
+      ['intro', 'problem', 'outro'].forEach((seg) => showSubs(seg, freeSubs));
+
+      const scene = (id) => {
+        const start = startOf(id);
+        fade(`#${id}`, start, lengthOf(id), 0.4, 0.4);
+        tl.from(`#${id} .caption`, { y: 30, opacity: 0, duration: 0.5, ease }, start + 0.35);
+        return start;
+      };
+      // Types `text` into `node` between `at` and `at + dur`.
+      const typeInto = (node, text, at, dur) => {
+        const o = { n: 0 };
+        tl.to(o, {
+          n: text.length, duration: dur, ease: 'none',
+          onUpdate: () => { node.textContent = text.slice(0, Math.round(o.n)); },
+        }, at);
+      };
+      const val = (id) => document.getElementById(id).querySelector('.val');
+      const moveCursor = (sel, x, y, at, dur = 0.7) => tl.to(sel, { x, y, duration: dur, ease: 'power2.inOut' }, at);
+      const click = (sel, at) => tl.to(sel, { scale: 0.8, duration: 0.08, yoyo: true, repeat: 1, transformOrigin: '20% 10%' }, at);
+      // Window-space y of a crop-space y, for a page scrolled by `pan` px.
+      const winY = (y, pan) => BAR + y * K - pan;
+      const pan = (sel, to, at, dur) => tl.to(sel, { y: -to, duration: dur, ease: 'power2.inOut' }, at);
+      const flash = (sel, at, hold) => {
+        tl.fromTo(sel, { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.25, ease }, at);
+        if (hold) tl.to(sel, { opacity: 0, duration: 0.25 }, at + hold);
+      };
+
+      // 1 · intro
+      fade('#intro', 0, lengthOf('intro'), 0.01, 0.4);
+      tl.from('#intro .tag', { y: 20, opacity: 0, duration: 0.6, ease }, 0.2);
+      tl.from('#intro h1', { y: 60, opacity: 0, duration: 0.9, ease }, 0.35);
+      tl.from('#intro .sub', { y: 30, opacity: 0, duration: 0.7, ease }, 0.9);
+      tl.from('#intro .by', { y: 20, opacity: 0, duration: 0.6, ease }, 1.3);
+
+      // 2 · by hand: each row typed into the form, slowly, one with a typo
+      const PR = startOf('problem');
+      fade('#problem', PR, lengthOf('problem'), 0.4, 0.4);
+      tl.from('#handform', { x: -50, opacity: 0, duration: 0.7, ease }, PR);
+      tl.from('#sheet', { x: 50, opacity: 0, duration: 0.7, ease }, PR + 0.2);
+      const HAND = [LEADS[0], { ...LEADS[1], email: 'luis.ramos@demo,pe' }, LEADS[2]];
+      HAND.forEach((r, i) => {
+        const at = PR + 0.8 + i * 1.75;
+        tl.to(`#s${i}`, { borderColor: 'rgba(96, 165, 250, 0.7)', backgroundColor: 'rgba(96, 165, 250, 0.1)', duration: 0.2 }, at);
+        typeInto(val('h-email'), r.email, at, 0.6);
+        typeInto(val('h-name'), r.name, at + 0.65, 0.35);
+        typeInto(val('h-country'), r.country, at + 1.05, 0.2);
+        typeInto(val('h-plan'), r.plan, at + 1.3, 0.15);
+        if (i === 1) {
+          tl.set('#h-email', { className: 'inp bad' }, at + 1.5);
+          tl.to('#typo', { opacity: 1, duration: 0.2 }, at + 1.5);
+          tl.to('#typo', { opacity: 0, duration: 0.2 }, at + 2.4);
+          tl.set('#h-email', { className: 'inp' }, at + 2.4);
+          tl.to(`#s${i}`, { borderColor: 'rgba(248, 113, 113, 0.8)', backgroundColor: 'rgba(248, 113, 113, 0.12)', duration: 0.2 }, at + 1.5);
+        } else {
+          tl.to(`#s${i} .st`, { opacity: 1, duration: 0.2 }, at + 1.55);
+          tl.to(`#s${i}`, { borderColor: 'rgba(255, 255, 255, 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.04)', duration: 0.2 }, at + 1.55);
+          tl.set('#cnt', { textContent: String(i === 0 ? 1 : 2) }, at + 1.55);
+        }
+      });
+
+      // 3 · analyze: type the URL, Analyze, the descriptor table; columns light up as named
+      const AN = scene('analyze');
+      tl.from('#anwin', { y: 40, opacity: 0, duration: 0.6, ease }, AN);
+      tl.set('#cur-an', { x: 1150, y: 700 }, AN);
+      pan('#an-pan', 100, AN + 0.3, 0.8);
+      moveCursor('#cur-an', 420, winY(329, 100), AN + 0.6);
+      click('#cur-an', AN + 1.3);
+      tl.set('#an-url', { opacity: 0 }, AN);
+      tl.set('#an-url', { opacity: 1 }, AN + 1.35);
+      typeInto(document.querySelector('#an-url .val'), FORM_URL, AN + 1.4, 1.4);
+      moveCursor('#cur-an', 175, winY(457, 100), AN + 3.0, 0.6);
+      click('#cur-an', AN + 3.7);
+      tl.to('#an-url', { opacity: 0, duration: 0.3 }, AN + 4.0);
+      tl.to('#anwin .next', { opacity: 1, duration: 0.35 }, AN + 4.0);
+      tl.to('#cur-an', { opacity: 0, duration: 0.3 }, AN + 4.0);
+      pan('#an-pan', 330, AN + 4.4, 1.0);
+      [['#hl-type', 5.9], ['#hl-sel', 6.5], ['#hl-lbl', 7.1], ['#hl-opt', 7.7], ['#hl-req', 8.3]].forEach(([s, t]) => flash(s, AN + t, 0.75));
+
+      // 4 · LLM chain: skipped, failed, answered; the resolved field comes back
+      const LL = scene('llm');
+      tl.from('#amb', { x: -40, opacity: 0, duration: 0.6, ease }, LL);
+      tl.from('#chain', { y: 30, opacity: 0, duration: 0.6, ease }, LL + 0.3);
+      tl.from('#chain .prov', { opacity: 0, x: -16, duration: 0.3, stagger: 0.15 }, LL + 0.7);
+      tl.set('#chain .prov .st', { textContent: copy.idle }, LL);
+      const prov = (id, at, text, color) => {
+        tl.to(`#${id}`, { borderColor: 'rgba(96, 165, 250, 0.8)', duration: 0.2 }, at);
+        tl.set(`#${id} .st`, { textContent: text }, at + 0.5);
+        tl.to(`#${id}`, { borderColor: color, backgroundColor: `${color}1f`, duration: 0.2 }, at + 0.5);
+        tl.to(`#${id} .st`, { color, duration: 0.2 }, at + 0.5);
+      };
+      prov('p1', LL + 1.8, copy.skipped, '#64748b');
+      prov('p2', LL + 2.6, copy.failed, '#f87171');
+      prov('p3', LL + 3.4, copy.answered, '#34d399');
+      tl.from('#answer', { x: 40, opacity: 0, duration: 0.6, ease }, LL + 4.1);
+      tl.from('#answer .via', { opacity: 0, duration: 0.3 }, LL + 4.8);
+
+      // 5 · data source: choose leads.csv, Inspect, the table is detected; kinds light up
+      const SR = scene('source');
+      tl.from('#srcwin', { y: 40, opacity: 0, duration: 0.6, ease }, SR);
+      tl.from('#kinds', { y: -10, opacity: 0, duration: 0.4, ease }, SR + 0.6);
+      tl.set('#cur-src', { x: 1100, y: 600 }, SR);
+      moveCursor('#cur-src', 165, winY(427, 0), SR + 0.5);
+      click('#cur-src', SR + 1.2);
+      tl.to('#src-file', { opacity: 1, duration: 0.1 }, SR + 1.3);
+      pan('#src-pan', 300, SR + 1.5, 0.8);
+      moveCursor('#cur-src', 170, winY(585, 300), SR + 1.5, 0.8);
+      click('#cur-src', SR + 2.5);
+      tl.to('#srcwin .next', { opacity: 1, duration: 0.3 }, SR + 2.7);
+      tl.to('#cur-src', { opacity: 0, duration: 0.3 }, SR + 2.8);
+      pan('#src-pan', 560, SR + 3.0, 1.0);
+      flash('#hl-table', SR + 4.2);
+      document.querySelectorAll('#kinds i').forEach((k, i) => {
+        const at = SR + [3.0, 3.6, 4.2, 5.0, 5.8][i];
+        tl.set(k, { color: '#0b1220', backgroundColor: '#60a5fa', borderColor: '#60a5fa' }, at);
+        if (i !== 0) tl.set(k, { color: '#94a3b8', backgroundColor: 'rgba(0,0,0,0)', borderColor: 'rgba(255,255,255,0.1)' }, at + 0.6);
+      });
+
+      // 6 · mapping: the mapped capture is revealed row by row over the empty one
+      const MP = scene('mapping');
+      tl.from('#mapwin', { y: 40, opacity: 0, duration: 0.6, ease }, MP);
+      tl.set('#map-pan', { y: -580 }, MP);
+      const mapDone = document.getElementById('map-done');
+      const MAPPED_H = 1103;
+      const reveal = { y: 395 };
+      tl.set(mapDone, { clipPath: `inset(0 0 ${100 - (395 / MAPPED_H) * 100}% 0)` }, MP);
+      tl.to(reveal, {
+        y: 810, duration: 1.8, ease: 'none',
+        onUpdate: () => { mapDone.style.clipPath = `inset(0 0 ${100 - (reveal.y / MAPPED_H) * 100}% 0)`; },
+      }, MP + 0.8);
+      flash('#hl-cols', MP + 0.8, 1.9);
+      flash('#hl-const', MP + 3.1, 1.0);
+      pan('#map-pan', 1000, MP + 3.8, 0.8);
+      tl.set(mapDone, { clipPath: 'none' }, MP + 3.7);
+      flash('#hl-att', MP + 4.6);
+
+      // 7 · row test: Test row → OK (830 ms)
+      const RT = scene('rowtest');
+      tl.from('#rtwin', { y: 40, opacity: 0, duration: 0.6, ease }, RT);
+      tl.set('#cur-rt', { x: 1100, y: 600 }, RT);
+      moveCursor('#cur-rt', 430, winY(436, 0), RT + 0.4, 0.6);
+      click('#cur-rt', RT + 1.1);
+      tl.to('#rtwin .next', { opacity: 1, duration: 0.3 }, RT + 1.5);
+      tl.to('#cur-rt', { opacity: 0, duration: 0.3 }, RT + 1.6);
+      pan('#rt-pan', 300, RT + 1.6, 0.8);
+      flash('#hl-ok', RT + 2.5);
+
+      // 8 · bulk run: each row opens a fresh session, fills the form, submits
+      const RN = scene('run');
+      tl.from('#runq', { x: -40, opacity: 0, duration: 0.6, ease }, RN);
+      tl.from('#target', { x: 40, opacity: 0, duration: 0.6, ease }, RN + 0.2);
+      tl.from('#run-rows .rrow', { opacity: 0, x: -16, duration: 0.3, stagger: 0.08 }, RN + 0.5);
+      const ROW_GAP = 1.05;
+      LEADS.forEach((r, i) => {
+        const at = RN + 1.1 + i * ROW_GAP;
+        const row = `#r${i}`;
+        tl.set('#session', { textContent: `${copy.session} #${i + 1}` }, at);
+        tl.set('#sent', { opacity: 0 }, at);
+        tl.set('#target .val', { textContent: '' }, at);
+        tl.set('#t-plan span', { className: '' }, at);
+        tl.set('#t-tos b', { backgroundColor: 'rgba(0,0,0,0)', borderColor: '#94a3b8', textContent: '' }, at);
+        tl.to(`${row} .w`, { opacity: 0, duration: 0.1 }, at);
+        tl.to(`${row} .go`, { opacity: 1, duration: 0.1 }, at);
+        tl.to(row, { borderColor: 'rgba(96, 165, 250, 0.7)', backgroundColor: 'rgba(96, 165, 250, 0.1)', duration: 0.15 }, at);
+        typeInto(val('t-email'), r.email, at + 0.05, 0.25);
+        typeInto(val('t-name'), r.name, at + 0.15, 0.2);
+        typeInto(val('t-country'), r.country, at + 0.25, 0.15);
+        tl.set(`#t-plan [data-v="${r.plan}"]`, { className: 'on' }, at + 0.35);
+        typeInto(val('t-date'), r.date, at + 0.35, 0.15);
+        typeInto(val('t-bio'), r.bio, at + 0.42, 0.18);
+        typeInto(val('t-cv'), CV_FILE, at + 0.5, 0.1);
+        tl.set('#t-tos b', { backgroundColor: '#2b5ce6', borderColor: '#2b5ce6', textContent: '✓' }, at + 0.6);
+        tl.to('#t-go', { backgroundColor: '#1e40af', duration: 0.08, yoyo: true, repeat: 1 }, at + 0.68);
+        tl.to('#sent', { opacity: 1, duration: 0.12 }, at + 0.8);
+        tl.to(`${row} .go`, { opacity: 0, duration: 0.1 }, at + 0.85);
+        tl.to(`${row} .ok`, { opacity: 1, duration: 0.15 }, at + 0.85);
+        tl.to(row, { borderColor: 'rgba(52, 211, 153, 0.5)', backgroundColor: 'rgba(52, 211, 153, 0.07)', duration: 0.15 }, at + 0.85);
+      });
+
+      // 9 · results: the real table, then the JSON log line by line
+      const RS = scene('results');
+      tl.from('#reswin', { x: -40, opacity: 0, duration: 0.6, ease }, RS);
+      tl.from('#json', { x: 40, opacity: 0, duration: 0.6, ease }, RS + 0.3);
+      tl.to('#json-lines div', { opacity: 1, duration: 0.2, stagger: 0.12 }, RS + 1.0);
+
+      // 10 · outro
+      const O = startOf('outro');
+      fade('#outro', O, lengthOf('outro'), 0.5, 0.01);
+      tl.from('#outro .tag', { y: 20, opacity: 0, duration: 0.5, ease }, O + 0.2);
+      tl.from('#outro .card', { y: 40, opacity: 0, duration: 0.6, ease, stagger: 0.12 }, O + 0.35);
+      tl.from('#outro .stack', { y: 20, opacity: 0, duration: 0.5, ease }, O + 1.1);
+      tl.from('#outro .url', { y: 20, opacity: 0, duration: 0.5, ease }, O + 1.4);
+
+      window.__timelines['main'] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

@@ -46,6 +46,25 @@ npm run render:es    # → renders/cejtracking-es.mp4
 npm run render:en    # → renders/cejtracking-en.mp4
 ```
 
+## formagent/
+
+74 s narrated walkthrough of Form Agent: typing records into a web form by
+hand → pasting the form URL and the descriptor table the agent builds → an
+ambiguous field going down the LLM provider chain (Claude Code → OpenRouter →
+Gemini → OpenAI, in the default order) → data source inspection → field
+mapping with a constant and an attachment → single-row test → bulk run, one
+browser session per row → results and `batch_result.json`. The wizard scenes
+use real screenshots of a local run on six fabricated rows
+(`assets/screens/`, cropped to the content column); the hand-typing, LLM and
+bulk-run scenes are HTML mock-ups. The JSON keeps the shape of `RowResult`.
+
+```bash
+cd videos/formagent
+npm run check
+npm run render:es    # → renders/formagent-es.mp4
+npm run render:en    # → renders/formagent-en.mp4
+```
+
 ## Narration
 
 Each composition keeps its script per scene and language in

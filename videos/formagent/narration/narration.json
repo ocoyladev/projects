@@ -1,0 +1,66 @@
+{
+  "voices": {
+    "es": {
+      "voice": "ef_dora",
+      "lang": "es-419",
+      "speed": 1.12
+    },
+    "en": {
+      "voice": "af_heart",
+      "lang": "en-us",
+      "speed": 1.05
+    }
+  },
+  "segments": [
+    {
+      "id": "intro",
+      "es": "Form Éiyent. Un RPA que llena formularios web en lote, a partir de un CSV, un Excel o una base de datos.",
+      "en": "Form Agent. An RPA tool that fills in web forms in bulk, from a CSV file, an Excel sheet or a database."
+    },
+    {
+      "id": "problem",
+      "es": "Cargar cientos de registros a mano en un formulario web es lento, y propenso a errores.",
+      "en": "Typing hundreds of records into a web form by hand is slow, and error-prone."
+    },
+    {
+      "id": "analyze",
+      "es": "Se pega la dirección del formulario, y el agente abre un navegador real para describir cada campo: tipo, selector, etiqueta, opciones, y si es obligatorio.",
+      "en": "You paste the form's address, and the agent opens a real browser to describe every field: type, selector, label, options, and whether it's required."
+    },
+    {
+      "id": "llm",
+      "es": "Si un campo es ambiguo, consulta una cadena de modelos de lenguaje, con respaldo entre proveedores.",
+      "en": "When a field is ambiguous, it asks a chain of language models, falling back from one provider to the next."
+    },
+    {
+      "id": "source",
+      "es": "Luego inspecciona la fuente de datos: CSV, Excel, SQLite, o una base Postgres o Mai S Q L.",
+      "en": "Then it inspects the data source: CSV, Excel, SQLite, or a Postgres or MySQL database."
+    },
+    {
+      "id": "mapping",
+      "es": "El mapeo asigna una columna a cada campo, y admite constantes y adjuntos.",
+      "en": "The mapping assigns a column to each field, and supports constants and file attachments."
+    },
+    {
+      "id": "rowtest",
+      "es": "Antes del lote, prueba una sola fila de punta a punta.",
+      "en": "Before the batch, it tests a single row end to end."
+    },
+    {
+      "id": "run",
+      "es": "Después ejecuta el lote: cada fila en su propia sesión de navegador, con tiempos, y capturas si algo falla.",
+      "en": "Then it runs the batch: each row in its own browser session, with timings, and screenshots if anything fails."
+    },
+    {
+      "id": "results",
+      "es": "Al final, deja un resumen por fila, y un registro en yéison.",
+      "en": "At the end, it leaves a per-row summary, and a JSON log."
+    },
+    {
+      "id": "outro",
+      "es": "Unas catorce mil ochocientas líneas y trescientos trece tests. Corre en local, con Dóker Compóus o como ejecutable de Windows.",
+      "en": "About fourteen thousand eight hundred lines and three hundred thirteen tests. It runs locally, with Docker Compose or as a Windows executable."
+    }
+  ]
+}
